@@ -19,8 +19,6 @@ export default function Index({ chats }: { chats: any[] }) {
         throw new Error('Function not implemented.');
     }
 
-    // useEcho(`chat.${chat.id}`, 'AIChatResponseReceived', (e) => console.log(e.message));
-
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
             <Head title="Dashboard" />

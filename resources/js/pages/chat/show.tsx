@@ -3,9 +3,33 @@ import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type Chat, type Message } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { useEffect, useRef } from 'react';
+import { useEcho } from '@laravel/echo-react';
+import { useEffect, useId, useRef, useState } from 'react';
 
-export default function Show({ chat, messages, chats }: { chat: Chat; messages: Message[]; chats: Chat[] }) {
+export default function Show({ chat, messages: initialMessages, chats }: { chat: Chat; messages: Message[]; chats: Chat[] }) {
+    const [streamedContent, setStreamedContent] = useState('');
+    const [messages, setMessages] = useState(initialMessages);
+
+    const id = useId();
+    useEcho(`chat.${chat.id}`, 'AIChatResponseReceived', (e: { content: string; chunk: string }) => {
+        setStreamedContent(() => e.content);
+        if (e.chunk === '</stream>') {
+            setStreamedContent('');
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    id: id,
+                    content: e.content,
+                    role: 'assistant',
+                    user_id: 1,
+                    chat_id: Number(chat.id),
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                },
+            ]);
+        }
+    });
+
     const messageContainerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -48,6 +72,12 @@ export default function Show({ chat, messages, chats }: { chat: Chat; messages: 
                                 <div>{msg.content}</div>
                             </div>
                         ))}
+                        {streamedContent.length > 0 && (
+                            <div className={`max-w-xl self-start rounded-lg bg-blue-50 p-4`}>
+                                <div className="mb-1 text-xs text-gray-500">Assistant</div>
+                                <div>{streamedContent}</div>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <form onSubmit={handleSubmit} className="fixed right-0 bottom-0 left-0 bg-transparent p-4">

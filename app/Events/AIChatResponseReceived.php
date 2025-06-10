@@ -16,7 +16,7 @@ class AIChatResponseReceived implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(public Chat $chat, public string $message)
+    public function __construct(public Chat $chat, public string $content, public string $chunk)
     {
         //
     }
