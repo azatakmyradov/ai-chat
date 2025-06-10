@@ -5,6 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Chat, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
 import { NavChats } from './nav-chats';
 
@@ -34,7 +35,24 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
-export function AppSidebar({ chats }: { chats?: Chat[] }) {
+export function AppSidebar({ chats: initialChats }: { chats: Chat[] }) {
+    const [chats, setChats] = useState(initialChats);
+
+    // Listen for title updates from EventStream
+    useEffect(() => {
+        const handleTitleUpdate = (event: CustomEvent) => {
+            const { chatId, newTitle } = event.detail;
+
+            // Update local state
+            setChats((prevChats) => prevChats.map((chat) => (chat.id === chatId ? { ...chat, title: newTitle } : chat)));
+        };
+
+        window.addEventListener('chatTitleUpdated', handleTitleUpdate as EventListener);
+
+        return () => {
+            window.removeEventListener('chatTitleUpdated', handleTitleUpdate as EventListener);
+        };
+    }, []);
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

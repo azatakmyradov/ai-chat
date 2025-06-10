@@ -15,7 +15,7 @@ class ChatController extends Controller
     public function index()
     {
         return inertia('chat/index', [
-            'chats' => user()->chats()->get(),
+            'chats' => user()->chats()->latest()->latest('id')->get(),
         ]);
     }
 
@@ -48,7 +48,7 @@ class ChatController extends Controller
 
         return inertia('chat/show', [
             'chat' => $chat,
-            'chats' => user()->chats()->get(),
+            'chats' => user()->chats()->latest()->latest('id')->get(),
             'messages' => $chat->messages()->with('user')->get(),
         ]);
     }

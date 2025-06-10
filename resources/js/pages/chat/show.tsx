@@ -1,3 +1,5 @@
+import SidebarTitleUpdater from '@/components/sidebar-title-updater';
+import TitleGenerator from '@/components/title-generator';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
@@ -9,10 +11,20 @@ import { useEffect, useRef, useState } from 'react';
 export default function Show({ chat, messages: initialMessages, chats }: { chat: Chat; messages: Message[]; chats: Chat[] }) {
     const [streamedContent, setStreamedContent] = useState('');
     const [messages, setMessages] = useState(initialMessages);
+    const [shouldGenerateTitle, setShouldGenerateTitle] = useState(false);
+    const [shouldUpdateSidebar, setShouldUpdateSidebar] = useState(false);
+    const [currentTitle, setCurrentTitle] = useState(chat.title);
 
     const { data, setData, post } = useForm({
         message: '',
     });
+
+    useEffect(() => {
+        if (chat && chat.title === 'New Thread' && streamedContent.length > 0) {
+            setShouldGenerateTitle(true);
+            setShouldUpdateSidebar(true);
+        }
+    }, [chat, streamedContent]);
 
     useEcho(`chat.${chat.id}`, 'AIResponseReceived', (e: { content: string; chunk: string }) => {
         setStreamedContent(() => e.content);
@@ -68,8 +80,32 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
     return (
         <AppLayout chats={chats}>
             <main className="flex flex-1 flex-col overflow-y-auto p-8">
-                <Head title={chat.title || `Chat ${chat.id}`} />
-                <h1 className="mb-4 text-2xl font-bold">{chat.title || `Chat ${chat.id}`}</h1>
+                <Head title={currentTitle} />
+
+                {shouldGenerateTitle && chat && (
+                    <TitleGenerator
+                        chatId={chat.id}
+                        onTitleUpdate={(newTitle) => {
+                            document.title = `${newTitle} - LaraChat`;
+                            setCurrentTitle(newTitle);
+                        }}
+                        onComplete={() => {
+                            setShouldGenerateTitle(false);
+                        }}
+                    />
+                )}
+
+                {/* Sidebar title updater - separate EventStream for sidebar */}
+                {shouldUpdateSidebar && chat && (
+                    <SidebarTitleUpdater
+                        chatId={chat.id}
+                        onComplete={() => {
+                            setShouldUpdateSidebar(false);
+                        }}
+                    />
+                )}
+
+                <h1 className="mb-4 text-2xl font-bold">{currentTitle}</h1>
                 <div className="mx-auto w-full max-w-4xl">
                     <div ref={messageContainerRef} className="flex flex-1 flex-col gap-4 overflow-y-auto pb-32">
                         {messages.map(
