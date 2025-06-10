@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatMessageController;
 use App\Models\Chat;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,6 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'chat' => Chat::first(),
         ]);
     });
+
+    Route::resource('/chat/{chat}/messages', ChatMessageController::class)
+        ->only(['store']);
 });
 
 require __DIR__.'/settings.php';

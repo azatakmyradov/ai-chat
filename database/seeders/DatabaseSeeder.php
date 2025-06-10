@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Chat;
+use App\Models\ChatMessage;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -19,7 +20,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        Chat::factory(5)->create([
+        $chats = Chat::factory(5)->create([
+            'user_id' => 1,
+        ]);
+
+        ChatMessage::factory(100)->recycle($chats)->create([
             'user_id' => 1,
         ]);
     }

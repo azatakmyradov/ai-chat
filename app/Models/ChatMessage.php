@@ -6,20 +6,19 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Chat extends Model
+class ChatMessage extends Model
 {
-    /** @use HasFactory<\Database\Factories\ChatFactory> */
+    /** @use HasFactory<\Database\Factories\ChatMessageFactory> */
     use HasFactory, HasUuids;
 
-    public function messages(): HasMany
+    public function chat(): BelongsTo
     {
-        return $this->hasMany(ChatMessage::class);
+        return $this->belongsTo(Chat::class);
     }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(BelongsTo::class);
+        return $this->belongsTo(User::class);
     }
 }
