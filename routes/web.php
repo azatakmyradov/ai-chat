@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatMessageController;
 use App\Models\Chat;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'chat' => Chat::first(),
         ]);
     });
+    Route::resource('chat', ChatController::class)
+        ->only(['index', 'store', 'show', 'destroy']);
 
     Route::resource('/chat/{chat}/messages', ChatMessageController::class)
         ->only(['store']);

@@ -2,7 +2,6 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Chat, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { useEcho } from '@laravel/echo-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -12,7 +11,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Show({ chat }: { chat: Chat }) {
-    useEcho(`chat.${chat.id}`, 'AIChatResponseReceived', (e) => console.log(e.message));
+    // useEcho(`chat.${chat.id}`, 'AIChatResponseReceived', (e) => console.log(e.message));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
