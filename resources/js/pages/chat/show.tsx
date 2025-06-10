@@ -3,7 +3,7 @@ import TitleGenerator from '@/components/title-generator';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
-import { type Chat, type Message } from '@/types';
+import { BreadcrumbItem, type Chat, type Message } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
 import { useEffect, useRef, useState } from 'react';
@@ -77,8 +77,19 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
         }
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'New Chat',
+            href: '/chat',
+        },
+        {
+            title: currentTitle,
+            href: `/chat/${chat.id}`,
+        },
+    ];
+
     return (
-        <AppLayout chats={chats}>
+        <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
             <main className="flex flex-1 flex-col overflow-y-auto p-8">
                 <Head title={currentTitle} />
 
@@ -105,7 +116,6 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
                     />
                 )}
 
-                <h1 className="mb-4 text-2xl font-bold">{currentTitle}</h1>
                 <div className="mx-auto w-full max-w-4xl">
                     <div ref={messageContainerRef} className="flex flex-1 flex-col gap-4 overflow-y-auto pb-32">
                         {messages.map(
@@ -113,31 +123,29 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
                                 msg.content.length > 0 && (
                                     <div
                                         key={msg.id}
-                                        className={`max-w-xl rounded-lg p-4 ${msg.role === 'assistant' ? 'self-start bg-blue-50' : 'self-end bg-green-50'}`}
+                                        className={`max-w-xl rounded-xl p-4 ${
+                                            msg.role === 'assistant' ? '' : 'self-end border border-border bg-muted/50 dark:bg-muted/30'
+                                        }`}
                                     >
-                                        <div className="mb-1 text-xs text-gray-500">
-                                            {msg.role === 'assistant' ? 'Assistant' : msg.user?.name || 'User'}
-                                        </div>
-                                        <div>{msg.content}</div>
+                                        <div className="whitespace-pre-wrap text-foreground">{msg.content}</div>
                                     </div>
                                 ),
                         )}
                         {streamedContent.length > 0 && (
-                            <div className={`max-w-xl self-start rounded-lg bg-blue-50 p-4`}>
-                                <div className="mb-1 text-xs text-gray-500">Assistant</div>
-                                <div>{streamedContent}</div>
+                            <div className="max-w-xl self-start rounded-xl border border-border bg-muted/50 p-4 dark:bg-muted/30">
+                                <div className="whitespace-pre-wrap text-foreground">{streamedContent}</div>
                             </div>
                         )}
                     </div>
                 </div>
-                <form onSubmit={handleSubmit} className="fixed right-0 bottom-0 left-0 bg-transparent p-4">
+                <form onSubmit={handleSubmit} className="fixed right-0 bottom-0 left-0 border-t border-border bg-background/80 p-4 backdrop-blur-sm">
                     <div className="mx-auto w-full max-w-4xl px-8">
                         <div className="relative flex items-end gap-2">
                             <Textarea
                                 value={data.message}
                                 onChange={(e) => setData('message', e.target.value)}
                                 placeholder="Type your message..."
-                                className="min-h-[80px] resize-none rounded-lg border-3 border-muted bg-white/80 pr-24 backdrop-blur-sm focus-visible:ring-1"
+                                className="min-h-[80px] resize-none rounded-lg border bg-background pr-24 focus-visible:ring-1"
                             />
                             <Button type="submit" className="absolute right-2 bottom-2 h-10 px-4">
                                 Send

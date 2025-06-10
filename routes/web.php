@@ -3,24 +3,12 @@
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatTitleStreamController;
-use App\Models\Chat;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::redirect('/', '/chat')->name('home');
+Route::redirect('/dashboard', '/chat')->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-
-    Route::get('/chat', function () {
-        return inertia('chat/show', [
-            'chat' => Chat::first(),
-        ]);
-    });
     Route::resource('chat', ChatController::class)
         ->only(['index', 'store', 'show', 'destroy']);
 

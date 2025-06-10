@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreChatRequest;
-use App\Jobs\AIRequestThreadDescription;
 use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
 
@@ -58,6 +57,19 @@ class ChatController extends Controller
      */
     public function destroy(Chat $chat)
     {
-        //
+        $chatId = $chat->id;
+        $chat->delete();
+
+        // Check if this is the current chat being viewed
+        $currentUrl = request()->header('Referer') ?? '';
+        $isCurrentChat = str_contains($currentUrl, "/chat/{$chatId}");
+
+        if ($isCurrentChat) {
+            // If deleting the current chat, redirect to home
+            return redirect()->route('chat.index');
+        } else {
+            // If deleting from sidebar, redirect back to current page
+            return redirect()->back();
+        }
     }
 }

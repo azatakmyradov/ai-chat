@@ -7,15 +7,15 @@ import { FormEvent, useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
+        title: 'New Chat',
+        href: '/chat',
     },
 ];
 
 export default function Index({ chats }: { chats: any[] }) {
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing } = useForm({
         message: '',
     });
 
@@ -30,7 +30,7 @@ export default function Index({ chats }: { chats: any[] }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
-            <Head title="Dashboard" />
+            <Head title="New Chat" />
             <main className="flex flex-1 flex-col items-center justify-center p-6">
                 <div className="container mx-auto max-w-4xl">
                     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
