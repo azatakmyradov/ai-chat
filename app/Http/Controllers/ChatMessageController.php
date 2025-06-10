@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreChatMessageRequest;
 use App\Http\Requests\UpdateChatMessageRequest;
+use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 
@@ -14,7 +15,13 @@ class ChatMessageController extends Controller
      */
     public function store(Chat $chat, StoreChatMessageRequest $request)
     {
-        //
+        $chat->messages()->create([
+            'user_id' => user()->id,
+            'content' => $request->get('message'),
+            'role' => 'user',
+        ]);
+
+        AIStreamResponse::dispatch($chat, $request->get('message'));
     }
 
     /**

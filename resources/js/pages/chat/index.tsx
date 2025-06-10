@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -15,8 +15,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Index({ chats }: { chats: any[] }) {
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
+    const { data, setData, post, processing, errors } = useForm({
+        message: '',
+    });
+
     function handleSubmit(event: FormEvent<HTMLFormElement>): void {
-        throw new Error('Function not implemented.');
+        event.preventDefault();
+        post(route('chat.store'), {
+            onSuccess: () => {
+                setData('message', '');
+            },
+        });
     }
 
     return (
@@ -30,10 +39,12 @@ export default function Index({ chats }: { chats: any[] }) {
                             <div className="relative flex items-end gap-2">
                                 <Textarea
                                     ref={inputRef}
+                                    value={data.message}
+                                    onChange={(e) => setData('message', e.target.value)}
                                     placeholder="Type your message..."
                                     className="min-h-[80px] resize-none rounded-lg border-muted bg-background pr-24 focus-visible:ring-1"
                                 />
-                                <Button type="submit" className="absolute right-2 bottom-2 h-10 px-4">
+                                <Button type="submit" className="absolute right-2 bottom-2 h-10 px-4" disabled={processing}>
                                     Send
                                 </Button>
                             </div>

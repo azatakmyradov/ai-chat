@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreChatRequest;
+use App\Jobs\AIRequestThreadDescription;
+use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
 
 class ChatController extends Controller
@@ -22,7 +24,19 @@ class ChatController extends Controller
      */
     public function store(StoreChatRequest $request)
     {
-        //
+        $chat = user()->chats()->create([
+            'title' => 'New Thread',
+        ]);
+
+        $chat->messages()->create([
+            'user_id' => user()->id,
+            'content' => $request->get('message'),
+            'role' => 'user',
+        ]);
+
+        AIStreamResponse::dispatch($chat, $request->get('message'));
+
+        return redirect()->route('chat.show', $chat);
     }
 
     /**
