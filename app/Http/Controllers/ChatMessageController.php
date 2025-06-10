@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Models;
 use App\Http\Requests\StoreChatMessageRequest;
 use App\Http\Requests\UpdateChatMessageRequest;
 use App\Jobs\AIStreamResponse;
@@ -21,7 +22,7 @@ class ChatMessageController extends Controller
             'role' => 'user',
         ]);
 
-        AIStreamResponse::dispatch($chat, $request->get('message'));
+        AIStreamResponse::dispatch($chat, $request->get('message'), Models::from($request->get('model')));
     }
 
     /**
@@ -37,6 +38,8 @@ class ChatMessageController extends Controller
      */
     public function destroy(ChatMessage $chatMessage)
     {
-        //
+        $chatMessage->delete();
+
+        return redirect()->back();
     }
 }

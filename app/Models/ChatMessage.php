@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\Models;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +13,13 @@ class ChatMessage extends Model
 {
     /** @use HasFactory<\Database\Factories\ChatMessageFactory> */
     use HasFactory, HasUuids;
+
+    protected function model(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => $value ? Models::from($value)->toArray() : null,
+        );
+    }
 
     public function chat(): BelongsTo
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Models;
 use App\Http\Requests\StoreChatRequest;
 use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
@@ -15,6 +16,7 @@ class ChatController extends Controller
     {
         return inertia('chat/index', [
             'chats' => user()->chats()->latest()->latest('id')->get(),
+            'models' => Models::getAvailableModels(),
         ]);
     }
 
@@ -33,7 +35,7 @@ class ChatController extends Controller
             'role' => 'user',
         ]);
 
-        AIStreamResponse::dispatch($chat, $request->get('message'));
+        AIStreamResponse::dispatch($chat, $request->get('message'), Models::from($request->get('model')));
 
         return redirect()->route('chat.show', $chat);
     }
@@ -49,6 +51,7 @@ class ChatController extends Controller
             'chat' => $chat,
             'chats' => user()->chats()->latest()->latest('id')->get(),
             'messages' => $chat->messages()->with('user')->get(),
+            'models' => Models::getAvailableModels(),
         ]);
     }
 

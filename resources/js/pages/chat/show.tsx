@@ -1,22 +1,36 @@
 import SidebarTitleUpdater from '@/components/sidebar-title-updater';
 import TitleGenerator from '@/components/title-generator';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, type Chat, type Message } from '@/types';
+import { BreadcrumbItem, Model, type Chat, type Message } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
 import { useEffect, useRef, useState } from 'react';
 
-export default function Show({ chat, messages: initialMessages, chats }: { chat: Chat; messages: Message[]; chats: Chat[] }) {
+export default function Show({
+    chat,
+    messages: initialMessages,
+    chats,
+    models,
+}: {
+    chat: Chat;
+    messages: Message[];
+    chats: Chat[];
+    models: Model[];
+}) {
     const [streamedContent, setStreamedContent] = useState('');
     const [messages, setMessages] = useState(initialMessages);
     const [shouldGenerateTitle, setShouldGenerateTitle] = useState(false);
     const [shouldUpdateSidebar, setShouldUpdateSidebar] = useState(false);
     const [currentTitle, setCurrentTitle] = useState(chat.title);
+    const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id || '');
 
     const { data, setData, post } = useForm({
         message: '',
+        model: selectedModel,
     });
 
     useEffect(() => {
@@ -26,7 +40,7 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
         }
     }, [chat, streamedContent]);
 
-    useEcho(`chat.${chat.id}`, 'AIResponseReceived', (e: { content: string; chunk: string }) => {
+    useEcho(`chat.${chat.id}`, 'AIResponseReceived', (e: { content: string; chunk: string; model: Model }) => {
         setStreamedContent(() => e.content);
         if (e.chunk === '</stream>') {
             setStreamedContent('');
@@ -40,6 +54,7 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
                     chat_id: Number(chat.id),
                     created_at: new Date(),
                     updated_at: new Date(),
+                    model: e.model,
                 },
             ]);
         }
@@ -68,6 +83,7 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
                     updated_at: new Date(),
                 },
             ]);
+            setData('model', selectedModel);
             post(`/chat/${chat.id}/messages`, {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -128,6 +144,7 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
                                         }`}
                                     >
                                         <div className="whitespace-pre-wrap text-foreground">{msg.content}</div>
+                                        <div className="text-xs text-muted-foreground">{msg.model?.name}</div>
                                     </div>
                                 ),
                         )}
@@ -145,11 +162,31 @@ export default function Show({ chat, messages: initialMessages, chats }: { chat:
                                 value={data.message}
                                 onChange={(e) => setData('message', e.target.value)}
                                 placeholder="Type your message..."
-                                className="min-h-[80px] resize-none rounded-lg border bg-background pr-24 focus-visible:ring-1"
+                                className="min-h-[80px] resize-none rounded-lg border bg-background pr-32 focus-visible:ring-1"
                             />
-                            <Button type="submit" className="absolute right-2 bottom-2 h-10 px-4">
-                                Send
-                            </Button>
+                            <div className="absolute right-2 bottom-2 flex items-center gap-2">
+                                <Select
+                                    value={selectedModel}
+                                    onValueChange={(value) => {
+                                        setSelectedModel(() => value);
+                                        setData('model', value);
+                                    }}
+                                >
+                                    <SelectTrigger className="h-10 w-[140px]">
+                                        <SelectValue placeholder="Select model" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {models.map((model) => (
+                                            <SelectItem key={model.id} value={model.id}>
+                                                {model.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Button type="submit" className="h-10 px-4">
+                                    Send
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </form>

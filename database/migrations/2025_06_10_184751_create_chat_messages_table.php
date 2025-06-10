@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class);
             $table->enum('role', ['assistant', 'user']);
             $table->text('content');
+            $table->string('model')->nullable();
             $table->timestamps();
         });
     }

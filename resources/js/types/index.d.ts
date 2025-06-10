@@ -50,6 +50,7 @@ export interface Message {
     chat?: Chat;
     user_id: number;
     chat_id: number;
+    model?: Model;
 }
 
 export interface Chat {
@@ -58,4 +59,11 @@ export interface Chat {
     user_id: number;
     messages?: Message[];
     user?: string;
+}
+
+export interface Model {
+    id: string;
+    name: string;
+    description: string;
+    provider: string;
 }

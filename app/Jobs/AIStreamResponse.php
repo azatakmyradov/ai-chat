@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Events\AIChatResponseReceived;
+use App\Enums\Models;
 use App\Events\AIResponseReceived;
 use App\Models\Chat;
 use App\Models\ChatMessage;
@@ -21,7 +21,7 @@ class AIStreamResponse implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Chat $chat, public string $message) {}
+    public function __construct(public Chat $chat, public string $message, public Models $model) {}
 
     /**
      * Execute the job.
@@ -31,7 +31,7 @@ class AIStreamResponse implements ShouldQueue
         $content = '';
 
         $response = Prism::text()
-            ->using('openai', 'gpt-4')
+            ->using($this->model->getProvider(), $this->model->value)
             ->withSystemPrompt(view('prompts.system'))
             ->withMessages($this->buildConversationHistory())
             ->asStream();
@@ -40,15 +40,16 @@ class AIStreamResponse implements ShouldQueue
         foreach ($response as $chunk) {
             $content .= $chunk->text;
 
-            AIResponseReceived::dispatch($this->chat, $content, $chunk->text);
+            AIResponseReceived::dispatch($this->chat, $content, $chunk->text, $this->model->toArray());
 
             if ($chunk->finishReason) {
                 $this->chat->messages()->create([
                     'user_id' => User::first(),
                     'role' => 'assistant',
                     'content' => $content,
+                    'model' => $this->model->value,
                 ]);
-                AIResponseReceived::dispatch($this->chat, $content, '</stream>');
+                AIResponseReceived::dispatch($this->chat, $content, '</stream>', $this->model->toArray());
             }
         }
     }

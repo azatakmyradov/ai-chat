@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Enums\Models;
 use App\Models\Chat;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -16,7 +17,7 @@ class AIResponseReceived implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public Chat $chat, public string $content, public string $chunk)
+    public function __construct(public Chat $chat, public string $content, public string $chunk, public array $model)
     {
         //
     }

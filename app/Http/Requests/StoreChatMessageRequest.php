@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Models;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreChatMessageRequest extends FormRequest
 {
@@ -23,6 +25,7 @@ class StoreChatMessageRequest extends FormRequest
     {
         return [
             'message' => ['required', 'string'],
+            'model' => ['required', 'string', Rule::in(array_column(Models::getAvailableModels(), 'id'))],
         ];
     }
 }

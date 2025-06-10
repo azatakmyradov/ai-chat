@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { Chat, Model, type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useRef } from 'react';
 
@@ -12,15 +14,18 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({ chats }: { chats: any[] }) {
+export default function Index({ chats, models }: { chats: Chat[]; models: Model[] }) {
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id || '');
 
     const { data, setData, post, processing } = useForm({
         message: '',
+        model: selectedModel,
     });
 
     function handleSubmit(event: FormEvent<HTMLFormElement>): void {
         event.preventDefault();
+        setData('model', selectedModel);
         post(route('chat.store'), {
             onSuccess: () => {
                 setData('message', '');
@@ -42,11 +47,25 @@ export default function Index({ chats }: { chats: any[] }) {
                                     value={data.message}
                                     onChange={(e) => setData('message', e.target.value)}
                                     placeholder="Type your message..."
-                                    className="min-h-[80px] resize-none rounded-lg border-muted bg-background pr-24 focus-visible:ring-1"
+                                    className="min-h-[80px] resize-none rounded-lg border-muted bg-background pr-32 focus-visible:ring-1"
                                 />
-                                <Button type="submit" className="absolute right-2 bottom-2 h-10 px-4" disabled={processing}>
-                                    Send
-                                </Button>
+                                <div className="absolute right-2 bottom-2 flex items-center gap-2">
+                                    <Select value={selectedModel} onValueChange={setSelectedModel}>
+                                        <SelectTrigger className="h-10 w-[140px]">
+                                            <SelectValue placeholder="Select model" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {models.map((model) => (
+                                                <SelectItem key={model.id} value={model.id}>
+                                                    {model.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Button type="submit" className="h-10 px-4" disabled={processing}>
+                                        Send
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </div>
