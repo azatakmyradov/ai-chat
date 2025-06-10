@@ -42,9 +42,20 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
+export interface Message {
+    id: string;
+    content: string;
+    role: 'assistant' | 'user';
+    user?: User;
+    chat?: Chat;
+    user_id: number;
+    chat_id: number;
+}
+
 export interface Chat {
     id: string;
     title: string;
     user_id: number;
+    messages?: Message[];
     user?: string;
 }

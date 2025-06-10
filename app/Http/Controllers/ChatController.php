@@ -30,7 +30,13 @@ class ChatController extends Controller
      */
     public function show(Chat $chat)
     {
-        //
+        $chat->load(['messages.user']);
+
+        return inertia('chat/show', [
+            'chat' => $chat,
+            'chats' => user()->chats()->get(),
+            'messages' => $chat->messages()->with('user')->get(),
+        ]);
     }
 
     /**
