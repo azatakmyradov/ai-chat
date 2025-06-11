@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Model, type Chat, type Message } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { BreadcrumbItem, Model, SharedData, type Chat, type Message } from '@/types';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
 import { SendIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -29,6 +29,8 @@ export default function Show({
     const [shouldUpdateSidebar, setShouldUpdateSidebar] = useState(false);
     const [currentTitle, setCurrentTitle] = useState(chat.title);
     const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id || '');
+
+    const page = usePage<SharedData>();
 
     const { data, setData, post } = useForm({
         message: '',
@@ -52,7 +54,7 @@ export default function Show({
                     id: new Date().toISOString(),
                     content: e.content,
                     role: 'assistant',
-                    user_id: 1,
+                    user_id: page.props.auth.user.id,
                     chat_id: Number(chat.id),
                     created_at: new Date(),
                     updated_at: new Date(),
@@ -60,6 +62,21 @@ export default function Show({
                 },
             ]);
         }
+    });
+
+    useEcho(`chat.${chat.id}`, 'UserMessageSent', (e: { message: string }) => {
+        setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+                id: new Date().toISOString(),
+                content: e.message,
+                role: 'user',
+                user_id: page.props.auth.user.id,
+                chat_id: Number(chat.id),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+        ]);
     });
 
     const messageContainerRef = useRef<HTMLDivElement>(null);
@@ -73,18 +90,6 @@ export default function Show({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (data.message.trim()) {
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                    id: new Date().toISOString(),
-                    content: data.message,
-                    role: 'user',
-                    user_id: 1,
-                    chat_id: Number(chat.id),
-                    created_at: new Date(),
-                    updated_at: new Date(),
-                },
-            ]);
             setData('model', selectedModel);
             post(`/chat/${chat.id}/messages`, {
                 preserveScroll: true,

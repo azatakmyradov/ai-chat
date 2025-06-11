@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Models;
+use App\Events\UserMessageSent;
 use App\Http\Requests\StoreChatMessageRequest;
 use App\Http\Requests\UpdateChatMessageRequest;
 use App\Jobs\AIStreamResponse;
@@ -22,6 +23,7 @@ class ChatMessageController extends Controller
             'role' => 'user',
         ]);
 
+        UserMessageSent::broadcast($chat, $request->get('message'))->toOthers();
         AIStreamResponse::dispatch($chat, $request->get('message'), Models::from($request->get('model')));
     }
 
