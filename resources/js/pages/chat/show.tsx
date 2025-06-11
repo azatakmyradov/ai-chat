@@ -1,6 +1,7 @@
 import SidebarTitleUpdater from '@/components/sidebar-title-updater';
 import TitleGenerator from '@/components/title-generator';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useLocalStorage from '@/hooks/useLocalStorage';
@@ -8,6 +9,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Model, type Chat, type Message } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
+import { SendIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 export default function Show({
@@ -106,7 +108,7 @@ export default function Show({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
-            <main className="flex flex-1 flex-col overflow-y-auto p-8">
+            <main className="relative flex h-full flex-1 flex-col overflow-y-auto">
                 <Head title={currentTitle} />
 
                 {shouldGenerateTitle && chat && (
@@ -132,61 +134,69 @@ export default function Show({
                     />
                 )}
 
-                <div className="mx-auto w-full max-w-4xl">
-                    <div ref={messageContainerRef} className="flex flex-1 flex-col gap-4 overflow-y-auto pb-32">
-                        {messages.map(
-                            (msg: Message) =>
-                                msg.content.length > 0 && (
-                                    <div
-                                        key={msg.id}
-                                        className={`max-w-xl rounded-xl p-4 ${
-                                            msg.role === 'assistant' ? '' : 'self-end border border-border bg-muted/50 dark:bg-muted/30'
-                                        }`}
-                                    >
-                                        <div className="whitespace-pre-wrap text-foreground">{msg.content}</div>
-                                        <div className="text-xs text-muted-foreground">{msg.model?.name}</div>
-                                    </div>
-                                ),
-                        )}
-                        {streamedContent.length > 0 && (
-                            <div className="max-w-xl self-start rounded-xl border border-border bg-muted/50 p-4 dark:bg-muted/30">
-                                <div className="whitespace-pre-wrap text-foreground">{streamedContent}</div>
-                            </div>
-                        )}
-                    </div>
+                <div className="mx-auto mt-2 w-full flex-1">
+                    <ScrollArea className="h-[calc(100vh-13rem)] w-full px-4">
+                        <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 pb-32">
+                            {messages.map(
+                                (msg: Message) =>
+                                    msg.content.length > 0 && (
+                                        <div
+                                            key={msg.id}
+                                            className={`max-w-xl rounded-xl p-4 ${
+                                                msg.role === 'assistant' ? '' : 'self-end border border-border bg-muted/50 dark:bg-muted/30'
+                                            }`}
+                                        >
+                                            <div className="whitespace-pre-wrap text-foreground">{msg.content}</div>
+                                            <div className="text-xs text-muted-foreground">{msg.model?.name}</div>
+                                        </div>
+                                    ),
+                            )}
+                            {streamedContent.length > 0 && (
+                                <div className="max-w-xl self-start rounded-xl border border-border bg-muted/50 p-4 dark:bg-muted/30">
+                                    <div className="whitespace-pre-wrap text-foreground">{streamedContent}</div>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
                 </div>
-                <form onSubmit={handleSubmit} className="fixed right-0 bottom-0 left-0 border-t border-border bg-background/80 p-4 backdrop-blur-sm">
-                    <div className="mx-auto w-full max-w-4xl px-8">
-                        <div className="relative flex items-end gap-2">
-                            <Textarea
-                                value={data.message}
-                                onChange={(e) => setData('message', e.target.value)}
-                                placeholder="Type your message..."
-                                className="min-h-[80px] resize-none rounded-lg border bg-background pr-32 focus-visible:ring-1"
-                            />
-                            <div className="absolute right-2 bottom-2 flex items-center gap-2">
-                                <Select
-                                    value={selectedModel}
-                                    onValueChange={(value) => {
-                                        setSelectedModel(() => value);
-                                        setData('model', value);
-                                    }}
-                                >
-                                    <SelectTrigger className="h-10 w-[140px]">
-                                        <SelectValue placeholder="Select model" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {models.map((model) => (
-                                            <SelectItem key={model.id} value={model.id}>
-                                                {model.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Button type="submit" className="h-10 px-4">
-                                    Send
-                                </Button>
-                            </div>
+
+                <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl px-4">
+                    <div className="relative flex items-end gap-2">
+                        <Textarea
+                            value={data.message}
+                            onChange={(e) => setData('message', e.target.value)}
+                            placeholder="Type your message..."
+                            className="min-h-[120px] w-full resize-none rounded-lg border bg-background pb-16 focus-visible:ring-1"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSubmit(e);
+                                }
+                            }}
+                            autoFocus
+                        />
+                        <div className="absolute right-2 bottom-2 flex flex-row-reverse items-center gap-2">
+                            <Button type="submit" className="h-10 px-4" size="icon" disabled={!data.message.trim()}>
+                                <SendIcon className="h-4 w-4" />
+                            </Button>
+                            <Select
+                                value={selectedModel}
+                                onValueChange={(value) => {
+                                    setSelectedModel(() => value);
+                                    setData('model', value);
+                                }}
+                            >
+                                <SelectTrigger className="h-10 w-[140px]">
+                                    <SelectValue placeholder="Select model" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {models.map((model) => (
+                                        <SelectItem key={model.id} value={model.id}>
+                                            {model.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </form>

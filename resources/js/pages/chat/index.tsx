@@ -5,7 +5,8 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
 import { Chat, Model, type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent, useRef } from 'react';
+import { SendIcon } from 'lucide-react';
+import { useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -23,7 +24,7 @@ export default function Index({ chats, models }: { chats: Chat[]; models: Model[
         model: selectedModel,
     });
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+    function handleSubmit(event: React.FormEvent): void {
         event.preventDefault();
         setData('model', selectedModel);
         post(route('chat.store'), {
@@ -40,17 +41,32 @@ export default function Index({ chats, models }: { chats: Chat[]; models: Model[
                 <div className="container mx-auto max-w-4xl">
                     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
                         <div className="mb-8 text-2xl font-medium text-muted-foreground">Select a chat to start messaging</div>
-                        <form onSubmit={handleSubmit} className="w-full max-w-2xl">
+                        <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl px-4">
                             <div className="relative flex items-end gap-2">
                                 <Textarea
-                                    ref={inputRef}
                                     value={data.message}
                                     onChange={(e) => setData('message', e.target.value)}
                                     placeholder="Type your message..."
-                                    className="min-h-[80px] resize-none rounded-lg border-muted bg-background pr-32 focus-visible:ring-1"
+                                    className="min-h-[120px] w-full resize-none rounded-lg border bg-background pb-16 focus-visible:ring-1"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSubmit(e);
+                                        }
+                                    }}
+                                    autoFocus
                                 />
-                                <div className="absolute right-2 bottom-2 flex items-center gap-2">
-                                    <Select value={selectedModel} onValueChange={setSelectedModel}>
+                                <div className="absolute right-2 bottom-2 flex flex-row-reverse items-center gap-2">
+                                    <Button type="submit" className="h-10 px-4" size="icon" disabled={!data.message.trim()}>
+                                        <SendIcon className="h-4 w-4" />
+                                    </Button>
+                                    <Select
+                                        value={selectedModel}
+                                        onValueChange={(value) => {
+                                            setSelectedModel(() => value);
+                                            setData('model', value);
+                                        }}
+                                    >
                                         <SelectTrigger className="h-10 w-[140px]">
                                             <SelectValue placeholder="Select model" />
                                         </SelectTrigger>
@@ -62,9 +78,6 @@ export default function Index({ chats, models }: { chats: Chat[]; models: Model[
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <Button type="submit" className="h-10 px-4" disabled={processing}>
-                                        Send
-                                    </Button>
                                 </div>
                             </div>
                         </form>
