@@ -6,7 +6,6 @@ use App\Enums\Models;
 use App\Events\AIResponseReceived;
 use App\Models\Chat;
 use App\Models\ChatMessage;
-use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Prism\Prism\Prism;
@@ -43,7 +42,7 @@ class AIStreamResponse implements ShouldQueue
 
             if ($chunk->finishReason) {
                 $this->chat->messages()->create([
-                    'user_id' => User::first(),
+                    'user_id' => $this->chat->user_id,
                     'role' => 'assistant',
                     'content' => $content,
                     'model' => $this->model->value,
@@ -59,7 +58,7 @@ class AIStreamResponse implements ShouldQueue
             ->messages()
             ->orderBy('created_at')
             ->get()
-            ->map(fn(ChatMessage $message): UserMessage|AssistantMessage => match ($message->role) {
+            ->map(fn (ChatMessage $message): UserMessage|AssistantMessage => match ($message->role) {
                 'user' => new UserMessage(content: $message->content ?? ''),
                 'assistant' => new AssistantMessage(content: $message->content ?? ''),
             })
