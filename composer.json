@@ -13,10 +13,10 @@
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.33",
-        "laravel/reverb": "^1.0",
         "laravel/tinker": "^2.10.1",
         "predis/predis": "^3.0",
         "prism-php/prism": "^0.69.0",
+        "pusher/pusher-php-server": "^7.2",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {

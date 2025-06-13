@@ -29,6 +29,7 @@ export default function Show({
     const [shouldUpdateSidebar, setShouldUpdateSidebar] = useState(false);
     const [currentTitle, setCurrentTitle] = useState(chat.title);
     const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id || '');
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const page = usePage<SharedData>();
 
@@ -82,6 +83,12 @@ export default function Show({
     const messageContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        if (streamedContent.length > 0 && isGenerating) {
+            setIsGenerating(false);
+        }
+    }, [streamedContent]);
+
+    useEffect(() => {
         if (messageContainerRef.current) {
             messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
         }
@@ -89,6 +96,7 @@ export default function Show({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setIsGenerating(true);
         if (data.message.trim()) {
             setData('model', selectedModel);
             post(`/chat/${chat.id}/messages`, {
@@ -156,6 +164,12 @@ export default function Show({
                                         </div>
                                     ),
                             )}
+                            <div className="ml-4 max-w-xl self-start rounded-xl">
+                                {isGenerating && (
+                                    <div className="size-8 animate-spin rounded-full border-4 border-blue-400 border-t-transparent pl-4"></div>
+                                )}
+                            </div>
+
                             {streamedContent.length > 0 && (
                                 <div className="max-w-xl self-start rounded-xl border border-border bg-muted/50 p-4 dark:bg-muted/30">
                                     <div className="whitespace-pre-wrap text-foreground">{streamedContent}</div>
