@@ -15,17 +15,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
-        $chats = Chat::factory(5)->create([
-            'user_id' => 1,
-        ]);
-
-        ChatMessage::factory(100)->recycle($chats)->create([
-            'user_id' => 1,
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
+        //
+        // $chats = Chat::factory(5)->create([
+        //     'user_id' => 1,
+        // ]);
+        //
+        // ChatMessage::factory(100)->recycle($chats)->create([
+        //     'user_id' => 1,
+        // ]);
     }
 }

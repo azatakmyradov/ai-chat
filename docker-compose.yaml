@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    container_name: app
+    expose:
+      - 8080
+
+  horizon:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    container_name: horizon
+    command: php artisan horizon
