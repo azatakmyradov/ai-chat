@@ -106,7 +106,7 @@ const MessageComponent = memo(function MessageComponent({ message, models }: Pro
                     </div>
                 )}
                 {message.role === 'assistant' && (
-                    <div className="flex w-full flex-row items-center justify-start gap-1 opacity-0 transition-opacity sm:group-hover/message:opacity-100">
+                    <div className="flex w-full flex-row items-center justify-start gap-1">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -160,7 +160,6 @@ const MessageComponent = memo(function MessageComponent({ message, models }: Pro
                                                     title="Retry message"
                                                 >
                                                     <RefreshCcw className="h-3.5 w-3.5" />
-                                                    Retry
                                                 </button>
                                             }
                                         >
