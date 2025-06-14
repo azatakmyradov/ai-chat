@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from './ui/textarea';
 
 type Props = {
-    chat: Chat;
+    chat?: Chat;
     models: Model[];
 };
 
@@ -75,6 +75,19 @@ export function SendMessageForm({ chat, models }: Props) {
         e.preventDefault();
         if (data.message.trim() || data.attachments.length > 0) {
             setData('model', selectedModel);
+
+            if (!chat) {
+                post(route('chat.store'), {
+                    preserveState: false,
+                    onSuccess: () => {
+                        setData('message', '');
+                        setData('attachments', []);
+                        setSelectedFiles([]);
+                    },
+                });
+                return;
+            }
+
             post(`/chat/${chat.id}/messages`, {
                 async: true,
                 preserveState: true,

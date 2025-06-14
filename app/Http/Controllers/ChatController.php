@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\CreateChatMessage;
 use App\Enums\Models;
 use App\Http\Requests\StoreChatRequest;
 use App\Http\Requests\UpdateChatRequest;
-use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
+use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ChatController extends Controller
 {
@@ -30,19 +32,24 @@ class ChatController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreChatRequest $request)
+    public function store(StoreChatRequest $request, CreateChatMessage $createChatMessage)
     {
-        $chat = user()->chats()->create([
-            'title' => 'New Thread',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $chat->messages()->create([
-            'user_id' => user()->id,
-            'content' => $request->get('message'),
-            'role' => 'user',
-        ]);
+            $createChatMessage->handle(
+                $chat = user()->chats()->create([
+                    'title' => 'New Thread',
+                ]),
+                $request
+            );
 
-        AIStreamResponse::dispatch($chat, Models::from($request->get('model')));
+            DB::commit();
+        } catch (Exception) {
+            DB::rollBack();
+
+            return back()->withErrors(['message' => 'Failed to create chat']);
+        }
 
         session()->flash('first_message', true);
 

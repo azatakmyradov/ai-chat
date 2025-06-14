@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\Models;
+use App\Models\ChatMessageAttachment;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
 
 class StoreChatRequest extends FormRequest
 {
@@ -26,6 +28,12 @@ class StoreChatRequest extends FormRequest
         return [
             'message' => ['required', 'string'],
             'model' => ['required', 'string', Rule::in(array_column(Models::getAvailableModels(), 'id'))],
+            'attachments' => ['nullable', 'array'],
+            'attachments.*' => [
+                'file',
+                File::types(array_keys(ChatMessageAttachment::getMimeTypes()))
+                    ->max(10 * 1024),
+            ],
         ];
     }
 }
