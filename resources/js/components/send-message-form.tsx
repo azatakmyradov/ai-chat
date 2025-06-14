@@ -1,7 +1,7 @@
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { cn } from '@/lib/utils';
-import { Chat, Model } from '@/types';
-import { useForm } from '@inertiajs/react';
+import { Chat, Model, SharedData } from '@/types';
+import { useForm, usePage } from '@inertiajs/react';
 import { PaperclipIcon, SendIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './ui/button';
@@ -24,6 +24,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export function SendMessageForm({ chat, models }: Props) {
     const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id ?? '');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const page = usePage<SharedData>();
 
     const { data, setData, post } = useForm({
         message: '',
@@ -100,6 +101,18 @@ export function SendMessageForm({ chat, models }: Props) {
             });
         }
     };
+
+    if (!page.props.auth.user?.openrouter_api_key) {
+        return (
+            <div className="mx-auto w-full max-w-3xl px-4">
+                <div className="flex flex-col gap-2">
+                    <p className="mb-4 text-center text-sm text-muted-foreground">
+                        You need to set your OpenRouter API key in your profile to use this feature.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl px-4">

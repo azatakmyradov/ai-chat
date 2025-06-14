@@ -13,6 +13,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
 import { Globe, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 type PageProps = {
     chat: Chat;
@@ -85,6 +86,8 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
 
         if (message) {
             setMessages((prevMessages) => [...prevMessages, message]);
+        } else {
+            toast.error('Failed to generate response');
         }
     });
 
@@ -126,11 +129,11 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
-            <main className="flex overflow-y-auto relative flex-col flex-1 h-full">
+            <main className="relative flex h-full flex-1 flex-col overflow-y-auto">
                 <Head title={currentTitle} />
 
-                <div className="flex justify-between items-center py-2 px-4 mx-auto w-full max-w-3xl">
-                    <div className="flex gap-2 items-center">
+                <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-2">
+                    <div className="flex items-center gap-2">
                         {shouldGenerateTitle && chat && (
                             <TitleGenerator
                                 chatId={chat.id}
@@ -149,10 +152,10 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div className="flex gap-2 items-center">
+                                    <div className="flex items-center gap-2">
                                         <Switch id="public-toggle" checked={isPublic} onCheckedChange={handlePublicToggle} />
-                                        <Label htmlFor="public-toggle" className="flex gap-1 items-center cursor-pointer">
-                                            <Globe className="w-4 h-4" />
+                                        <Label htmlFor="public-toggle" className="flex cursor-pointer items-center gap-1">
+                                            <Globe className="h-4 w-4" />
                                             <span className="text-sm">Public</span>
                                         </Label>
                                     </div>
@@ -177,8 +180,8 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
 
                 <ChatMessages messages={messages} isStreaming={isStreaming}>
                     {isGenerating && streaming.content.length === 0 && (
-                        <div className="flex gap-2 items-center py-4 rounded-xl bg-background">
-                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                        <div className="flex items-center gap-2 rounded-xl bg-background py-4">
+                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">AI is generating...</span>
                         </div>
                     )}

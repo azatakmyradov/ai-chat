@@ -1,6 +1,6 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Link, useForm, usePage } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 import DeleteUser from '@/components/delete-user';
@@ -21,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 type ProfileForm = {
     name: string;
     email: string;
+    openrouter_api_key: string | null;
 };
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
@@ -29,6 +30,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
         name: auth.user.name,
         email: auth.user.email,
+        openrouter_api_key: auth.user.openrouter_api_key,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -36,6 +38,18 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
         patch(route('profile.update'), {
             preserveScroll: true,
+            onSuccess: () => {
+                setData('openrouter_api_key', '');
+            },
+        });
+    };
+
+    const handleDeleteKey = () => {
+        router.delete(route('profile.delete-key'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setData('openrouter_api_key', '');
+            },
         });
     };
 
@@ -76,6 +90,38 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         />
 
                         <InputError className="mt-2" message={errors.email} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="openrouter_api_key">OpenRouter API key</Label>
+                        <span className="text-xs text-muted-foreground">
+                            This is used to authenticate with the OpenRouter API. You can find your API key{' '}
+                            <a href="https://openrouter.ai/settings/api-keys" target="_blank" rel="noopener noreferrer">
+                                here
+                            </a>
+                            .
+                        </span>
+
+                        {auth.user.openrouter_api_key === 'redacted' ? (
+                            <>
+                                <span className="text-xs text-green-500">Your key is set.</span>
+                                <Button variant="outline" onClick={handleDeleteKey} className="mt-2" type="button">
+                                    Delete key
+                                </Button>
+                            </>
+                        ) : (
+                            <Input
+                                id="openrouter_api_key"
+                                type="text"
+                                className="mt-1 block w-full"
+                                value={data.openrouter_api_key!}
+                                onChange={(e) => setData('openrouter_api_key', e.target.value)}
+                                autoComplete="openrouter_api_key"
+                                placeholder="OpenRouter API key"
+                            />
+                        )}
+
+                        <InputError className="mt-2" message={errors.openrouter_api_key} />
                     </div>
 
                     {mustVerifyEmail && auth.user.email_verified_at === null && (

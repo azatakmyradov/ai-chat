@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('openrouter_api_key')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -41,6 +42,7 @@ return new class extends Migration
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
+            'openrouter_api_key' => config('prism.open-router.api_key'),
         ]);
     }
 

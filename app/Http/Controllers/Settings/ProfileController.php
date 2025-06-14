@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
+use function Pest\Laravel\delete;
+
 class ProfileController extends Controller
 {
     /**
@@ -33,6 +35,10 @@ class ProfileController extends Controller
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
+        }
+
+        if ($request->validated('openrouter_api_key') === null) {
+            unset($request->user()->openrouter_api_key);
         }
 
         $request->user()->save();

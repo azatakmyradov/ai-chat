@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\AI\OpenRouter\OpenRouter;
 use App\Enums\Models;
 use App\Events\AIResponseFailed;
 use App\Events\AIResponseReceived;
@@ -26,7 +27,10 @@ class AIStreamResponse implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Chat $chat, public Models $model) {}
+    public function __construct(public Chat $chat, public Models $model)
+    {
+        //
+    }
 
     /**
      * Execute the job.
@@ -35,8 +39,18 @@ class AIStreamResponse implements ShouldQueue
     {
         $content = '';
 
+        $apiKey = $this->chat->user->getRawOriginal('openrouter_api_key');
+
+        if ($apiKey === null) {
+            AIResponseFailed::dispatch($this->chat, null);
+
+            return;
+        }
+
         $response = Prism::text()
-            ->using('open-router', $this->model->value)
+            ->using('open-router', $this->model->value, [
+                'api_key' => $apiKey,
+            ])
             ->withSystemPrompt(view('prompts.system'))
             ->withMessages($this->buildConversationHistory())
             ->asStream();
@@ -54,7 +68,9 @@ class AIStreamResponse implements ShouldQueue
                 }
             }
         } catch (Exception) {
-            $message = $this->createAssistantMessage($content, true);
+            if ($content) {
+                $message = $this->createAssistantMessage($content, true);
+            }
 
             AIResponseFailed::dispatch($this->chat, $message ?? null);
         }

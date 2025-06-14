@@ -13,7 +13,7 @@ This is for the Cloneathon T3 Chat.
 - [x] Syntax Highlighting
 - [x] Resumable Streams
 - [x] Chat Sharing
+- [x] Bring Your Own Key
 - [ ] Chat Branching
 - [ ] Web Search
 - [ ] Image Generation Support
-- [ ] Bring Your Own Key
