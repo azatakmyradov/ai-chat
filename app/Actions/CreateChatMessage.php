@@ -33,7 +33,7 @@ class CreateChatMessage
         }
 
         UserMessageSent::broadcast($chat, $message->load('attachments'));
-        AIStreamResponse::dispatch($chat, Models::from($request->get('model')));
+        AIStreamResponse::dispatch($chat, $request->get('web_search') ?? false, Models::from($request->get('model')));
 
         return $message;
     }

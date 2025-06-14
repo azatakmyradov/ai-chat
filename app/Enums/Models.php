@@ -19,7 +19,7 @@ enum Models: string
     public static function getAvailableModels(): array
     {
         return array_map(
-            fn (Models $model): array => $model->toArray(),
+            fn(Models $model): array => $model->toArray(),
             self::cases()
         );
     }
@@ -58,12 +58,29 @@ enum Models: string
         };
     }
 
+    public function getProvider(): array
+    {
+        $providers = [
+            'openai' => 'OpenAI',
+            'anthropic' => 'Anthropic',
+            'google' => 'Google',
+        ];
+
+        $providerId = explode('/', $this->value)[0];
+
+        return [
+            'id' => $providerId ?? 'unknown',
+            'name' => $providers[$providerId] ?? 'Unknown',
+        ];
+    }
+
     public function toArray(): array
     {
         return [
             'id' => $this->value,
             'name' => $this->getName(),
             'description' => $this->getDescription(),
+            'provider' => $this->getProvider(),
         ];
     }
 }

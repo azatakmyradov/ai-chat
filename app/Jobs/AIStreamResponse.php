@@ -27,7 +27,7 @@ class AIStreamResponse implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Chat $chat, public Models $model)
+    public function __construct(public Chat $chat, public bool $webSearch, public Models $model)
     {
         //
     }
@@ -48,7 +48,7 @@ class AIStreamResponse implements ShouldQueue
         }
 
         $response = Prism::text()
-            ->using('open-router', $this->model->value, [
+            ->using('open-router', $this->webSearch ? $this->model->value . ':online' : $this->model->value, [
                 'api_key' => $apiKey,
             ])
             ->withSystemPrompt(view('prompts.system'))

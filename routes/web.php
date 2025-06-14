@@ -8,7 +8,6 @@ use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatTitleStreamController;
 use Illuminate\Support\Facades\Route;
 use Prism\Prism\Prism;
-use Prism\Prism\ValueObjects\Messages\Support\Document;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 Route::redirect('/', '/chat')->name('home');
@@ -32,21 +31,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('attachments.show');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
 
 Route::get('/test', function () {
-    $message = new UserMessage('Explain and summarize the contents of the attached document', [
-        Document::fromPath(
-            path: '/Users/azatakmyradov/Downloads/EJ1172284.pdf',
-        ),
-    ]);
-
     $response = Prism::text()
         ->using('open-router', Models::GEMINI_2_0_FLASH->value)
         ->withSystemPrompt(view('prompts.system'))
         ->withMessages([
-            $message
+            new UserMessage('Tell me latest news about USA'),
         ])
         ->asText();
 

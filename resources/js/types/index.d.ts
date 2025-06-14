@@ -74,9 +74,14 @@ export interface Chat {
     user?: string;
 }
 
+export interface ModelProvider {
+    id: string;
+    name: string;
+}
+
 export interface Model {
     id: string;
     name: string;
     description: string;
-    provider: string;
+    provider: ModelProvider;
 }

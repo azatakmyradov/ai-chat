@@ -28,6 +28,7 @@ class StoreChatMessageRequest extends FormRequest
         return [
             'message' => ['required', 'string'],
             'model' => ['required', 'string', Rule::in(array_column(Models::getAvailableModels(), 'id'))],
+            'web_search' => ['boolean'],
             'attachments' => ['nullable', 'array'],
             'attachments.*' => [
                 'file',

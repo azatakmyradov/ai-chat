@@ -2,10 +2,18 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { cn } from '@/lib/utils';
 import { Chat, Model, SharedData } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
-import { PaperclipIcon, SendIcon, XIcon } from 'lucide-react';
+import { PaperclipIcon, SearchIcon, SendIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 import { Textarea } from './ui/textarea';
 
 type Props = {
@@ -26,10 +34,35 @@ export function SendMessageForm({ chat, models }: Props) {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const page = usePage<SharedData>();
 
-    const { data, setData, post } = useForm({
+    // Group models by provider
+    const modelsByProvider = models.reduce(
+        (acc, model) => {
+            const provider = model.provider;
+            if (!acc[provider.id]) {
+                acc[provider.id] = {
+                    name: provider.name,
+                    models: [],
+                };
+            }
+            acc[provider.id].models.push(model);
+            return acc;
+        },
+        {} as Record<string, { name: string; models: Model[] }>,
+    );
+
+    // Get the currently selected model's name
+    const selectedModelName = models.find((m) => m.id === selectedModel)?.name ?? 'Select Model';
+
+    const { data, setData, post } = useForm<{
+        message: string;
+        model: string;
+        attachments: File[];
+        web_search: boolean;
+    }>({
         message: '',
         model: selectedModel,
         attachments: [] as File[],
+        web_search: false,
     });
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,26 +163,7 @@ export function SendMessageForm({ chat, models }: Props) {
                     </div>
                 )}
                 <div className="relative flex items-end gap-2">
-                    <Textarea
-                        value={data.message}
-                        onChange={(e) => setData('message', e.target.value)}
-                        placeholder="Type your message..."
-                        className={cn(
-                            'min-h-[120px] w-full resize-none rounded-lg border bg-background pb-16 focus-visible:ring-1',
-                            selectedFiles.length > 0 && 'pb-20',
-                        )}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSubmit(e);
-                            }
-                        }}
-                        autoFocus
-                    />
-                    <div className="absolute right-2 bottom-2 flex flex-row-reverse items-center gap-2">
-                        <Button type="submit" className="h-10 px-4" size="icon" disabled={!data.message.trim() && data.attachments.length === 0}>
-                            <SendIcon className="h-4 w-4" />
-                        </Button>
+                    <div className="absolute bottom-2 left-2 flex items-center gap-2">
                         <div className="relative">
                             <input
                                 type="file"
@@ -171,24 +185,65 @@ export function SendMessageForm({ chat, models }: Props) {
                                 <PaperclipIcon className="h-4 w-4" />
                             </Button>
                         </div>
-                        <Select
-                            value={selectedModel}
-                            onValueChange={(value) => {
-                                setSelectedModel(() => value);
-                                setData('model', value);
-                            }}
+                        <Button
+                            type="button"
+                            variant={data.web_search ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setData('web_search', !data.web_search)}
                         >
-                            <SelectTrigger className="h-10 w-[140px]">
-                                <SelectValue placeholder="Select model" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {models.map((model) => (
-                                    <SelectItem key={model.id} value={model.id}>
-                                        {model.name}
-                                    </SelectItem>
+                            <SearchIcon />
+                            Web Search
+                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                                    {selectedModel ? selectedModelName : 'Select Model'}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                {Object.entries(modelsByProvider).map(([providerId, { name: providerName, models: providerModels }]) => (
+                                    <DropdownMenuSub key={providerId}>
+                                        <DropdownMenuSubTrigger
+                                            className={cn(providerId === selectedModel?.split('/')[0] && 'bg-accent text-accent-foreground')}
+                                        >
+                                            {providerName}
+                                        </DropdownMenuSubTrigger>
+                                        <DropdownMenuSubContent>
+                                            {providerModels.map((model) => (
+                                                <DropdownMenuItem
+                                                    key={model.id}
+                                                    onClick={() => setSelectedModel(model.id)}
+                                                    className={cn(model.id === selectedModel && 'bg-accent text-accent-foreground')}
+                                                >
+                                                    {model.name}
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuSub>
                                 ))}
-                            </SelectContent>
-                        </Select>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Textarea
+                        value={data.message}
+                        onChange={(e) => setData('message', e.target.value)}
+                        placeholder="Type your message..."
+                        className={cn(
+                            'min-h-[120px] w-full resize-none rounded-lg border bg-background pb-16 focus-visible:ring-1',
+                            selectedFiles.length > 0 && 'pb-20',
+                        )}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSubmit(e);
+                            }
+                        }}
+                        autoFocus
+                    />
+                    <div className="absolute right-2 bottom-2">
+                        <Button type="submit" className="h-10 px-4" size="icon" disabled={!data.message.trim() && data.attachments.length === 0}>
+                            <SendIcon className="h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
             </div>
