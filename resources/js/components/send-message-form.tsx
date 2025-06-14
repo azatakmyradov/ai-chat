@@ -2,7 +2,7 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { cn } from '@/lib/utils';
 import { Chat, Model, SharedData } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
-import { PaperclipIcon, SearchIcon, SendIcon, XIcon } from 'lucide-react';
+import { Globe, PaperclipIcon, SendIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './ui/button';
 import {
@@ -182,7 +182,7 @@ export function SendMessageForm({ chat, models }: Props) {
                                 className="h-10 w-10"
                                 onClick={() => document.getElementById('file-upload')?.click()}
                             >
-                                <PaperclipIcon className="h-4 w-4" />
+                                <PaperclipIcon className="size-4" />
                             </Button>
                         </div>
                         <Button
@@ -191,8 +191,8 @@ export function SendMessageForm({ chat, models }: Props) {
                             size="sm"
                             onClick={() => setData('web_search', !data.web_search)}
                         >
-                            <SearchIcon />
-                            Web Search
+                            <Globe className="size-4" />
+                            <span className="hidden text-xs sm:block">Web Search</span>
                         </Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
