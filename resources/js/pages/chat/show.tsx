@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Model, SharedData, type Chat, type ChatMessage as ChatMessageType } from '@/types';
+import { BreadcrumbItem, ChatMessage, Model, SharedData, type Chat, type ChatMessage as ChatMessageType } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
 import { Globe, Loader2 } from 'lucide-react';
@@ -79,20 +79,18 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
         }
     });
 
-    useEcho(`chat.${chat.id}`, 'UserMessageSent', (e: { message: string }) => {
+    useEcho(`chat.${chat.id}`, 'AIResponseFailed', ({ message }: { message?: ChatMessage }) => {
+        setIsGenerating(false);
+        setStreaming(() => ({ content: '', model: selectedModel }));
+
+        if (message) {
+            setMessages((prevMessages) => [...prevMessages, message]);
+        }
+    });
+
+    useEcho(`chat.${chat.id}`, 'UserMessageSent', ({ message }: { message: ChatMessage }) => {
         setIsGenerating(true);
-        setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-                id: new Date().toISOString(),
-                content: e.message,
-                role: 'user',
-                user_id: page.props.auth.user.id,
-                chat_id: chat.id,
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-        ]);
+        setMessages((prevMessages) => [...prevMessages, message]);
     });
 
     const messageContainerRef = useRef<HTMLDivElement>(null);

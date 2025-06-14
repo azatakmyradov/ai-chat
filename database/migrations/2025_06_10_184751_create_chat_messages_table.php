@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('role', ['assistant', 'user']);
             $table->text('content');
             $table->string('model')->nullable();
+            $table->boolean('is_failed')->default(false);
             $table->timestamps();
         });
     }

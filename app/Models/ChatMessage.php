@@ -15,6 +15,10 @@ class ChatMessage extends Model
     /** @use HasFactory<\Database\Factories\ChatMessageFactory> */
     use HasFactory, HasUuids;
 
+    protected $casts = [
+        'is_failed' => 'boolean',
+    ];
+
     protected function model(): Attribute
     {
         return Attribute::make(

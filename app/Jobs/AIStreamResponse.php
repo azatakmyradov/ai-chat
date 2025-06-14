@@ -3,10 +3,12 @@
 namespace App\Jobs;
 
 use App\Enums\Models;
+use App\Events\AIResponseFailed;
 use App\Events\AIResponseReceived;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\ChatMessageAttachment;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
@@ -39,22 +41,34 @@ class AIStreamResponse implements ShouldQueue
             ->withMessages($this->buildConversationHistory())
             ->asStream();
 
-        // Process each chunk as it arrives
-        foreach ($response as $chunk) {
-            $content .= $chunk->text;
+        try {
+            // Process each chunk as it arrives
+            foreach ($response as $chunk) {
+                $content .= $chunk->text;
 
-            AIResponseReceived::dispatch($this->chat, $content, $chunk->text, $this->model->toArray());
+                AIResponseReceived::dispatch($this->chat, $content, $chunk->text, $this->model->toArray());
 
-            if ($chunk->finishReason) {
-                $this->chat->messages()->create([
-                    'user_id' => $this->chat->user_id,
-                    'role' => 'assistant',
-                    'content' => $content,
-                    'model' => $this->model->value,
-                ]);
-                AIResponseReceived::dispatch($this->chat, $content, '</stream>', $this->model->toArray());
+                if ($chunk->finishReason) {
+                    $this->createAssistantMessage($content);
+                    AIResponseReceived::dispatch($this->chat, $content, '</stream>', $this->model->toArray());
+                }
             }
+        } catch (Exception) {
+            $message = $this->createAssistantMessage($content, true);
+
+            AIResponseFailed::dispatch($this->chat, $message ?? null);
         }
+    }
+
+    private function createAssistantMessage(string $content, bool $isFailed = false): ChatMessage
+    {
+        return $this->chat->messages()->create([
+            'user_id' => $this->chat->user_id,
+            'role' => 'assistant',
+            'content' => $content,
+            'model' => $this->model->value,
+            'is_failed' => $isFailed,
+        ]);
     }
 
     private function buildConversationHistory(): array
@@ -84,9 +98,11 @@ class AIStreamResponse implements ShouldQueue
                 ),
                 'document' => Document::fromPath(
                     path: storage_path('app/private/' . $attachment->file_path),
+                    title: $attachment->file_name,
                 ),
                 'text' => new Text(
-                    file_get_contents(storage_path('app/private/' . $attachment->file_path)),
+                    'This is a contents of plain textfile attached to the message: ' . PHP_EOL . PHP_EOL .
+                        file_get_contents(storage_path('app/private/' . $attachment->file_path)),
                 ),
                 default => throw new \Exception('Invalid attachment type'),
             }

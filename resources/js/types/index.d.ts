@@ -46,10 +46,11 @@ export interface ChatMessage {
     id: string;
     content: string;
     role: 'assistant' | 'user';
-    user?: User;
-    chat?: Chat;
     user_id: number;
     chat_id: string;
+    is_failed?: boolean;
+    user?: User;
+    chat?: Chat;
     model?: Model;
     attachments?: ChatMessageAttachment[];
 }

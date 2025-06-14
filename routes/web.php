@@ -1,12 +1,13 @@
 <?php
 
 use App\Enums\Models;
+use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatTitleStreamController;
 use Illuminate\Support\Facades\Route;
 use Prism\Prism\Prism;
-use Prism\Prism\ValueObjects\Messages\Support\Image;
+use Prism\Prism\ValueObjects\Messages\Support\Document;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 Route::redirect('/', '/chat')->name('home');
@@ -22,15 +23,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/chat/{chat}/title-stream', ChatTitleStreamController::class)
         ->name('chat.title-stream');
+
+    Route::get('/attachments/{attachment}', [ChatAttachmentController::class, 'show'])
+        ->name('attachments.show');
 });
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 
 Route::get('/test', function () {
-    $message = new UserMessage('Improve this code', [
-        Image::fromPath(
-            path: storage_path('app/private/attachments/6G8GkgwBijs3we6yrefFfpkqLHtmcRcLTzHuait9.png'),
+    $message = new UserMessage('Explain and summarize the contents of the attached document', [
+        Document::fromPath(
+            path: '/Users/azatakmyradov/Downloads/EJ1172284.pdf',
         ),
     ]);
 

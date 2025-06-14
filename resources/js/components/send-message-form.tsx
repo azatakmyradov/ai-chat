@@ -39,6 +39,10 @@ export function SendMessageForm({ chat, models }: Props) {
             const isValidType = Object.entries(ACCEPTED_FILE_TYPES).some(([mimeType, extensions]) => {
                 if (mimeType === 'image/*') {
                     return file.type.startsWith('image/');
+                } else if (mimeType === 'application/pdf') {
+                    return file.type === 'application/pdf';
+                } else if (mimeType === 'text/*') {
+                    return file.type === 'text/plain';
                 }
                 return file.type === mimeType;
             });

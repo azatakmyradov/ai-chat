@@ -71,7 +71,7 @@ class ChatController extends Controller
         return inertia('chat/show', [
             'chat' => $chat,
             'chats' => Auth::check() ? user()->chats()->latest()->latest('id')->get() : [],
-            'messages' => $chat->messages()->with('user')->get(),
+            'messages' => $chat->messages,
             'models' => Models::getAvailableModels(),
             'first_message' => session()->get('first_message', false),
         ]);

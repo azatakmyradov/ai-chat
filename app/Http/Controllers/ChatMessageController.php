@@ -51,7 +51,7 @@ class ChatMessageController extends Controller
             ]);
         }
 
-        UserMessageSent::broadcast($chat, $request->get('message'))->toOthers();
+        UserMessageSent::broadcast($chat, $message->load('attachments'));
         AIStreamResponse::dispatch($chat, Models::from($request->get('model')));
     }
 
