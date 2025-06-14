@@ -6,10 +6,15 @@ use App\Enums\Models;
 use App\Events\AIResponseReceived;
 use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Models\ChatMessageAttachment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Collection;
 use Prism\Prism\Prism;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+use Prism\Prism\ValueObjects\Messages\Support\Image;
+use Prism\Prism\ValueObjects\Messages\Support\Document;
+use Prism\Prism\ValueObjects\Messages\Support\Text;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 class AIStreamResponse implements ShouldQueue
@@ -19,7 +24,7 @@ class AIStreamResponse implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Chat $chat, public string $message, public Models $model) {}
+    public function __construct(public Chat $chat, public Models $model) {}
 
     /**
      * Execute the job.
@@ -56,12 +61,35 @@ class AIStreamResponse implements ShouldQueue
     {
         return $this->chat
             ->messages()
+            ->with(['attachments'])
             ->orderBy('created_at')
             ->get()
-            ->map(fn (ChatMessage $message): UserMessage|AssistantMessage => match ($message->role) {
-                'user' => new UserMessage(content: $message->content ?? ''),
+            ->map(fn(ChatMessage $message) => match ($message->role) {
+                'user' => new UserMessage(
+                    content: $message->content ?? '',
+                    additionalContent: $this->buildAttachments($message->attachments),
+                ),
                 'assistant' => new AssistantMessage(content: $message->content ?? ''),
             })
             ->toArray();
+    }
+
+    private function buildAttachments(Collection $attachments): array
+    {
+        return $attachments->map(
+            fn(ChatMessageAttachment $attachment) =>
+            match ($attachment->type) {
+                'image' => Image::fromPath(
+                    path: storage_path('app/private/' . $attachment->file_path),
+                ),
+                'document' => Document::fromPath(
+                    path: storage_path('app/private/' . $attachment->file_path),
+                ),
+                'text' => new Text(
+                    file_get_contents(storage_path('app/private/' . $attachment->file_path)),
+                ),
+                default => throw new \Exception('Invalid attachment type'),
+            }
+        )->toArray();
     }
 }

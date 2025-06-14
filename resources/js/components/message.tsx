@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
-import type { Message } from '@/types';
+import type { ChatMessage } from '@/types';
 import { memo } from 'react';
 import Markdown from './markdown';
 
 type Props = {
-    message: Message;
+    message: ChatMessage;
     isStreaming?: boolean;
 };
 

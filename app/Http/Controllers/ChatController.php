@@ -42,7 +42,7 @@ class ChatController extends Controller
             'role' => 'user',
         ]);
 
-        AIStreamResponse::dispatch($chat, $request->get('message'), Models::from($request->get('model')));
+        AIStreamResponse::dispatch($chat, Models::from($request->get('model')));
 
         session()->flash('first_message', true);
 
@@ -66,7 +66,7 @@ class ChatController extends Controller
      */
     public function show(Chat $chat)
     {
-        $chat->load(['messages.user']);
+        $chat->load(['messages.user', 'messages.attachments']);
 
         return inertia('chat/show', [
             'chat' => $chat,

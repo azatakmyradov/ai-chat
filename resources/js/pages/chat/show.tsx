@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Model, SharedData, type Chat, type Message as MessageType } from '@/types';
+import { BreadcrumbItem, Model, SharedData, type Chat, type ChatMessage as ChatMessageType } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
 import { Globe, Loader2 } from 'lucide-react';
@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from 'react';
 
 type PageProps = {
     chat: Chat;
-    messages: MessageType[];
+    messages: ChatMessageType[];
     chats: Chat[];
     models: Model[];
     first_message: boolean;

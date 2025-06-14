@@ -42,7 +42,7 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
-export interface Message {
+export interface ChatMessage {
     id: string;
     content: string;
     role: 'assistant' | 'user';
@@ -51,6 +51,14 @@ export interface Message {
     user_id: number;
     chat_id: string;
     model?: Model;
+    attachments?: ChatMessageAttachment[];
+}
+
+export interface ChatMessageAttachment {
+    id: string;
+    file_name: string;
+    file_path: string;
+    type: 'image' | 'document' | 'text';
 }
 
 export interface Chat {
@@ -58,7 +66,7 @@ export interface Chat {
     title: string;
     user_id: number;
     is_public: boolean;
-    messages?: Message[];
+    messages?: ChatMessage[];
     user?: string;
 }
 

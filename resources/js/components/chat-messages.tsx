@@ -1,11 +1,11 @@
-import type { Message as MessageType } from '@/types';
+import type { ChatMessage as ChatMessageType } from '@/types';
 import 'highlight.js/styles/obsidian.css';
 import { ReactNode, useEffect, useRef } from 'react';
 import { Message } from './message';
 import { ScrollArea } from './ui/scroll-area';
 
 type Props = {
-    messages: MessageType[];
+    messages: ChatMessageType[];
     children: ReactNode;
     isStreaming?: boolean;
 };
