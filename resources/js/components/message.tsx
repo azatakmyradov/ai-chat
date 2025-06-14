@@ -42,7 +42,7 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                     message.role === 'assistant' ? 'w-full rounded-xl' : 'ml-auto w-fit rounded-xl',
                     message.role === 'assistant' ? 'bg-background' : 'self-end border border-border bg-muted/50 px-4 pt-2 pb-0.5 dark:bg-muted/30',
                     isStreaming && 'min-h-[100px]',
-                    'group/message',
+                    'group/message relative',
                 )}
             >
                 <div
@@ -94,7 +94,7 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                     </div>
                 )}
                 {message.role === 'assistant' && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground opacity-0 transition-all duration-200 group-hover/message:opacity-100">
+                    <div className="absolute left-0 mt-2 -ml-0.5 flex w-full flex-row items-center justify-start gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover/message:opacity-100">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>

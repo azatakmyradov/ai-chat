@@ -20,7 +20,11 @@ export function NavChats({ chats = [] }: { chats: Chat[] }) {
                 {chats.map((chat) => (
                     <SidebarMenuItem key={chat.id}>
                         <SidebarMenuButton asChild isActive={page.url.startsWith(`/chat/${chat.id}`)} tooltip={{ children: chat.title }}>
-                            <Link href={route('chat.show', { chat: chat.id })} className="group/chat flex items-center justify-between" prefetch>
+                            <Link
+                                href={route('chat.show', { chat: chat.id })}
+                                className="group/chat flex items-center justify-between"
+                                prefetch="click"
+                            >
                                 <div className="flex items-center gap-2">
                                     {chat.branch_chat_id && (
                                         <TooltipProvider>
@@ -32,10 +36,10 @@ export function NavChats({ chats = [] }: { chats: Chat[] }) {
                                                         onClick={(e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            router.get(route('chat.show', { chat: chat.branch_chat_id }));
+                                                            router.get(route('chat.show', { chat: chat.branch_chat_id }), {}, { prefetch: true });
                                                         }}
                                                     >
-                                                        <GitBranchIcon className="h-4 w-4 text-gray-500 opacity-75 group-hover/branch:text-primary group-hover/chat:opacity-100" />
+                                                        <GitBranchIcon className="h-4 w-4 text-gray-500 opacity-75 transition-all duration-300 group-hover/branch:text-primary group-hover/chat:opacity-100" />
                                                     </button>
                                                 </TooltipTrigger>
                                                 <TooltipContent side="bottom">
