@@ -14,6 +14,6 @@ This is for the Cloneathon T3 Chat.
 - [x] Resumable Streams
 - [x] Chat Sharing
 - [x] Bring Your Own Key
-- [ ] Chat Branching
+- [x] Chat Branching
 - [ ] Web Search
 - [ ] Image Generation Support
