@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Models;
 use App\Http\Requests\StoreChatRequest;
+use App\Http\Requests\UpdateChatRequest;
 use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +45,17 @@ class ChatController extends Controller
         AIStreamResponse::dispatch($chat, $request->get('message'), Models::from($request->get('model')));
 
         session()->flash('first_message', true);
+
+        return redirect()
+            ->route('chat.show', $chat);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Chat $chat, UpdateChatRequest $request)
+    {
+        $chat->update($request->validated());
 
         return redirect()
             ->route('chat.show', $chat);

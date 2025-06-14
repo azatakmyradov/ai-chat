@@ -9,8 +9,8 @@ Route::redirect('/', '/chat')->name('home');
 Route::redirect('/dashboard', '/chat')->name('dashboard');
 
 Route::resource('chat', ChatController::class)
-    ->only(['index', 'store', 'show', 'destroy'])
-    ->middlewareFor(['index', 'store', 'destroy'], 'auth');
+    ->only(['index', 'store', 'update', 'show', 'destroy'])
+    ->middlewareFor(['index', 'store', 'update', 'destroy'], 'auth');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/chat/{chat}/messages', ChatMessageController::class)

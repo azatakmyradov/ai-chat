@@ -57,6 +57,7 @@ export interface Chat {
     id: string;
     title: string;
     user_id: number;
+    is_public: boolean;
     messages?: Message[];
     user?: string;
 }

@@ -3,12 +3,15 @@ import { Message } from '@/components/message';
 import { SendMessageForm } from '@/components/send-message-form';
 import SidebarTitleUpdater from '@/components/sidebar-title-updater';
 import TitleGenerator from '@/components/title-generator';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Model, SharedData, type Chat, type Message as MessageType } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
-import { Loader2 } from 'lucide-react';
+import { Globe, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 type PageProps = {
@@ -30,6 +33,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
         content: '',
         model: selectedModel,
     });
+    const [isPublic, setIsPublic] = useState(chat.is_public);
 
     const page = usePage<SharedData>();
 
@@ -110,23 +114,56 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
         },
     ];
 
+    const handlePublicToggle = (checked: boolean) => {
+        setIsPublic(checked);
+        router.put(
+            route('chat.update', { chat: chat.id }),
+            { is_public: checked },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
             <main className="relative flex h-full flex-1 flex-col overflow-y-auto">
                 <Head title={currentTitle} />
 
-                {shouldGenerateTitle && chat && (
-                    <TitleGenerator
-                        chatId={chat.id}
-                        onTitleUpdate={(newTitle) => {
-                            document.title = `${newTitle} - LaraChat`;
-                            setCurrentTitle(newTitle);
-                        }}
-                        onComplete={() => {
-                            setShouldGenerateTitle(false);
-                        }}
-                    />
-                )}
+                <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-2">
+                    <div className="flex items-center gap-2">
+                        {shouldGenerateTitle && chat && (
+                            <TitleGenerator
+                                chatId={chat.id}
+                                onTitleUpdate={(newTitle) => {
+                                    document.title = `${newTitle} - LaraChat`;
+                                    setCurrentTitle(newTitle);
+                                }}
+                                onComplete={() => {
+                                    setShouldGenerateTitle(false);
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex items-center gap-2">
+                                    <Switch id="public-toggle" checked={isPublic} onCheckedChange={handlePublicToggle} />
+                                    <Label htmlFor="public-toggle" className="flex cursor-pointer items-center gap-1">
+                                        <Globe className="h-4 w-4" />
+                                        <span className="text-sm">Public</span>
+                                    </Label>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Make this chat visible to everyone</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
 
                 {/* Sidebar title updater - separate EventStream for sidebar */}
                 {shouldUpdateSidebar && chat && (

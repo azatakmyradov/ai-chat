@@ -39,8 +39,8 @@ export function ChatMessages({ messages, children, isStreaming }: Props) {
     }, [messages, isStreaming]);
 
     return (
-        <div className="mx-auto mt-2 min-h-[calc(100vh-13rem)] w-full flex-1">
-            <ScrollArea ref={scrollRef} className="h-[calc(100vh-13rem)] w-full">
+        <div className="mx-auto mt-2 min-h-[calc(100vh-16rem)] w-full flex-1">
+            <ScrollArea ref={scrollRef} className="h-[calc(100vh-16rem)] w-full">
                 <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-4 px-4 pb-32">
                     {messages.map(
                         (message, index) =>
