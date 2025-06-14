@@ -49,7 +49,7 @@ export interface Message {
     user?: User;
     chat?: Chat;
     user_id: number;
-    chat_id: number;
+    chat_id: string;
     model?: Model;
 }
 

@@ -1,20 +1,18 @@
+import { ChatMessages } from '@/components/chat-messages';
+import { Message } from '@/components/message';
+import { SendMessageForm } from '@/components/send-message-form';
 import SidebarTitleUpdater from '@/components/sidebar-title-updater';
 import TitleGenerator from '@/components/title-generator';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Model, SharedData, type Chat, type Message } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { BreadcrumbItem, Model, SharedData, type Chat, type Message as MessageType } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
-import { SendIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 type PageProps = {
     chat: Chat;
-    messages: Message[];
+    messages: MessageType[];
     chats: Chat[];
     models: Model[];
     first_message: boolean;
@@ -25,8 +23,8 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
     const [shouldGenerateTitle, setShouldGenerateTitle] = useState(false);
     const [shouldUpdateSidebar, setShouldUpdateSidebar] = useState(false);
     const [currentTitle, setCurrentTitle] = useState(chat.title);
-    const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id || '');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [selectedModel] = useLocalStorage('selectedModel', models[0]?.id ?? '');
     const [streaming, setStreaming] = useState({
         content: '',
         model: selectedModel,
@@ -34,16 +32,13 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
 
     const page = usePage<SharedData>();
 
-    const { data, setData, post } = useForm({
-        message: '',
-        model: selectedModel,
-    });
+    const isStreaming = streaming.content.length > 0;
 
     useEffect(() => {
         if (first_message) {
             setIsGenerating(true);
         }
-    }, []);
+    }, [first_message]);
 
     useEffect(() => {
         if (chat && chat.title === 'New Thread' && streaming.content.length > 0) {
@@ -53,7 +48,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
     }, [chat, streaming.content]);
 
     useEcho(`chat.${chat.id}`, 'AIResponseReceived', ({ content, chunk, model }: { content: string; chunk: string; model: Model }) => {
-        if (chunk === '') return;
+        if (chunk.trim() === '') return;
 
         setStreaming(() => ({
             content,
@@ -68,7 +63,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                     id: new Date().toISOString(),
                     role: 'assistant',
                     user_id: page.props.auth.user.id,
-                    chat_id: Number(chat.id),
+                    chat_id: chat.id,
                     created_at: new Date(),
                     updated_at: new Date(),
                     model,
@@ -86,7 +81,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                 content: e.message,
                 role: 'user',
                 user_id: page.props.auth.user.id,
-                chat_id: Number(chat.id),
+                chat_id: chat.id,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
@@ -99,29 +94,13 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
         if (streaming.content.length > 0 && isGenerating) {
             setIsGenerating(false);
         }
-    }, [streaming.content]);
+    }, [isGenerating, streaming.content]);
 
     useEffect(() => {
         if (messageContainerRef.current) {
             messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
         }
     }, [messages]);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsGenerating(true);
-        if (data.message.trim()) {
-            setData('model', selectedModel);
-            post(`/chat/${chat.id}/messages`, {
-                async: true,
-                preserveState: true,
-                preserveScroll: true,
-                onSuccess: () => {
-                    setData('message', '');
-                },
-            });
-        }
-    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -136,7 +115,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
-            <main className="flex overflow-y-auto relative flex-col flex-1 h-full">
+            <main className="relative flex h-full flex-1 flex-col overflow-y-auto">
                 <Head title={currentTitle} />
 
                 {shouldGenerateTitle && chat && (
@@ -162,79 +141,29 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                     />
                 )}
 
-                <div className="flex-1 mx-auto mt-2 w-full">
-                    <ScrollArea className="px-4 w-full h-[calc(100vh-13rem)]">
-                        <div className="flex flex-col gap-4 pb-32 mx-auto w-full max-w-2xl">
-                            {messages.map(
-                                (msg: Message) =>
-                                    msg.content.length > 0 && (
-                                        <div
-                                            key={msg.id}
-                                            className={`max-w-xl rounded-xl p-4 ${
-                                                msg.role === 'assistant' ? '' : 'self-end border border-border bg-muted/50 dark:bg-muted/30'
-                                            }`}
-                                        >
-                                            <div className="whitespace-pre-wrap text-foreground">{msg.content}</div>
-                                            <div className="text-xs text-muted-foreground">{msg.model?.name}</div>
-                                        </div>
-                                    ),
-                            )}
-                            <div className="self-start mt-4 ml-4 max-w-xl rounded-xl">
-                                {isGenerating && messages[messages.length - 1]?.role === 'user' && (
-                                    <div className="pl-4 rounded-full border-4 border-blue-400 animate-spin size-8 border-t-transparent"></div>
-                                )}
-                            </div>
-
-                            {streaming.content.length > 0 && (
-                                <div className="self-start p-4 max-w-xl rounded-xl border border-border bg-muted/10 dark:bg-muted/30">
-                                    <div className="whitespace-pre-wrap text-foreground">{streaming.content}</div>
-                                    <div className="text-xs text-muted-foreground">{models.find((model) => model.id === streaming.model)?.name}</div>
-                                </div>
-                            )}
-                        </div>
-                    </ScrollArea>
-                </div>
-
-                <form onSubmit={handleSubmit} className="px-4 mx-auto w-full max-w-2xl">
-                    <div className="flex relative gap-2 items-end">
-                        <Textarea
-                            value={data.message}
-                            onChange={(e) => setData('message', e.target.value)}
-                            placeholder="Type your message..."
-                            className="pb-16 w-full rounded-lg border resize-none focus-visible:ring-1 min-h-[120px] bg-background"
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleSubmit(e);
-                                }
-                            }}
-                            autoFocus
-                        />
-                        <div className="flex absolute right-2 bottom-2 flex-row-reverse gap-2 items-center">
-                            <Button type="submit" className="px-4 h-10" size="icon" disabled={!data.message.trim()}>
-                                <SendIcon className="w-4 h-4" />
-                            </Button>
-                            <Select
-                                value={selectedModel}
-                                onValueChange={(value) => {
-                                    setSelectedModel(() => value);
-                                    setData('model', value);
-                                }}
-                            >
-                                <SelectTrigger className="h-10 w-[140px]">
-                                    <SelectValue placeholder="Select model" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {models.map((model) => (
-                                        <SelectItem key={model.id} value={model.id}>
-                                            {model.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <ChatMessages messages={messages} isStreaming={isStreaming}>
+                    <div className="mt-4 ml-4 max-w-xl self-start rounded-xl">
+                        {isGenerating && messages[messages.length - 1]?.role === 'user' && (
+                            <div className="size-8 animate-spin rounded-full border-4 border-blue-400 border-t-transparent pl-4"></div>
+                        )}
                     </div>
-                </form>
+
+                    {streaming.content.length > 0 && (
+                        <Message
+                            message={{
+                                id: new Date().toISOString(),
+                                chat_id: chat.id,
+                                user_id: page.props.auth.user.id,
+                                role: 'assistant',
+                                content: streaming.content,
+                                model: models.find((model) => model.id === streaming.model) as Model,
+                            }}
+                            isStreaming={true}
+                        />
+                    )}
+                </ChatMessages>
+
+                <SendMessageForm chat={chat} models={models} />
             </main>
         </AppLayout>
     );
