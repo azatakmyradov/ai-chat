@@ -13,6 +13,10 @@ class Chat extends Model
     /** @use HasFactory<\Database\Factories\ChatFactory> */
     use HasFactory, HasUuids;
 
+    protected $casts = [
+        'is_public' => 'boolean',
+    ];
+
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);

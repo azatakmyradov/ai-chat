@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/chat')->name('home');
 Route::redirect('/dashboard', '/chat')->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('chat', ChatController::class)
-        ->only(['index', 'store', 'show', 'destroy']);
+Route::resource('chat', ChatController::class)
+    ->only(['index', 'store', 'show', 'destroy'])
+    ->middlewareFor(['index', 'store', 'destroy'], 'auth');
 
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/chat/{chat}/messages', ChatMessageController::class)
         ->only(['store']);
 
@@ -19,5 +20,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('chat.title-stream');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

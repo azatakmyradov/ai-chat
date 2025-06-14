@@ -163,7 +163,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                     )}
                 </ChatMessages>
 
-                <SendMessageForm chat={chat} models={models} onMessageSend={() => {}} />
+                {page.props.auth.user && <SendMessageForm chat={chat} models={models} />}
             </main>
         </AppLayout>
     );

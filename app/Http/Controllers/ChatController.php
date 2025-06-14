@@ -6,9 +6,15 @@ use App\Enums\Models;
 use App\Http\Requests\StoreChatRequest;
 use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
+use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Chat::class);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -52,7 +58,7 @@ class ChatController extends Controller
 
         return inertia('chat/show', [
             'chat' => $chat,
-            'chats' => user()->chats()->latest()->latest('id')->get(),
+            'chats' => Auth::check() ? user()->chats()->latest()->latest('id')->get() : [],
             'messages' => $chat->messages()->with('user')->get(),
             'models' => Models::getAvailableModels(),
             'first_message' => session()->get('first_message', false),

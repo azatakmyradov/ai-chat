@@ -9,10 +9,9 @@ import { Textarea } from './ui/textarea';
 type Props = {
     chat: Chat;
     models: Model[];
-    onMessageSend: () => void;
 };
 
-export function SendMessageForm({ chat, models, onMessageSend }: Props) {
+export function SendMessageForm({ chat, models }: Props) {
     const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id ?? '');
 
     const { data, setData, post } = useForm({
@@ -23,7 +22,6 @@ export function SendMessageForm({ chat, models, onMessageSend }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (data.message.trim()) {
-            onMessageSend();
             setData('model', selectedModel);
             post(`/chat/${chat.id}/messages`, {
                 async: true,

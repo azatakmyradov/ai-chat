@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('chats', function (Blueprint $table) {
             $table->uuid('id');
             $table->string('title');
+            $table->boolean('is_public')->default(false);
             $table->foreignIdFor(User::class);
             $table->timestamps();
         });

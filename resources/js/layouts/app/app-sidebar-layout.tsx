@@ -9,7 +9,7 @@ export default function AppSidebarLayout({
     children,
     breadcrumbs = [],
     chats,
-}: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[]; chats: Chat[] }>) {
+}: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[]; chats?: Chat[] }>) {
     return (
         <AppShell variant="sidebar">
             <AppSidebar chats={chats} />
