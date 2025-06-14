@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Models;
+use App\Http\Controllers\BranchOffChatController;
 use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatMessageController;
@@ -20,6 +21,9 @@ Route::resource('chat', ChatController::class)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/chat/{chat}/messages', ChatMessageController::class)
         ->only(['store']);
+
+    Route::post('/chat/{chat}/messages/{message}', BranchOffChatController::class)
+        ->name('chat.branch-off');
 
     Route::get('/chat/{chat}/title-stream', ChatTitleStreamController::class)
         ->name('chat.title-stream');

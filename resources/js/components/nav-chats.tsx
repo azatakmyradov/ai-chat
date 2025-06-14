@@ -2,8 +2,9 @@ import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-di
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Chat, SharedData } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { TrashIcon } from 'lucide-react';
+import { GitBranchIcon, TrashIcon } from 'lucide-react';
 import { MouseEvent, useState } from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 export function NavChats({ chats = [] }: { chats: Chat[] }) {
     const page = usePage<SharedData>();
@@ -19,8 +20,32 @@ export function NavChats({ chats = [] }: { chats: Chat[] }) {
                 {chats.map((chat) => (
                     <SidebarMenuItem key={chat.id}>
                         <SidebarMenuButton asChild isActive={page.url.startsWith(`/chat/${chat.id}`)} tooltip={{ children: chat.title }}>
-                            <Link href={`/chat/${chat.id}`} className="group/chat flex justify-between" prefetch>
-                                <span className="truncate">{chat.title}</span>
+                            <Link href={route('chat.show', { chat: chat.id })} className="group/chat flex items-center justify-between" prefetch>
+                                <div className="flex items-center gap-2">
+                                    {chat.branch_chat_id && (
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        type="button"
+                                                        className="group/branch"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            router.get(route('chat.show', { chat: chat.branch_chat_id }));
+                                                        }}
+                                                    >
+                                                        <GitBranchIcon className="h-4 w-4 text-gray-500 opacity-75 group-hover/branch:text-primary group-hover/chat:opacity-100" />
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="bottom">
+                                                    <p>Branched from {chat.title}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    )}
+                                    <span className="truncate">{chat.title}</span>
+                                </div>
                                 <DeleteChatButton chat={chat} />
                             </Link>
                         </SidebarMenuButton>

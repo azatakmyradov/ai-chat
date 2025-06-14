@@ -69,6 +69,8 @@ export interface Chat {
     user_id: number;
     is_public: boolean;
     messages?: ChatMessage[];
+    branch_chat_id?: string;
+    branchChat?: Chat;
     user?: string;
 }
 

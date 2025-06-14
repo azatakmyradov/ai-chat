@@ -1,9 +1,11 @@
 import { cn } from '@/lib/utils';
 import type { ChatMessage, ChatMessageAttachment } from '@/types';
-import { FileIcon, ImageIcon } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { Check, Copy, FileIcon, GitBranchIcon, ImageIcon } from 'lucide-react';
 import { memo, useState } from 'react';
 import { AttachmentModal } from './attachment-modal';
 import Markdown from './markdown';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 type Props = {
     message: ChatMessage;
@@ -12,6 +14,17 @@ type Props = {
 
 const MessageComponent = memo(function MessageComponent({ message, isStreaming }: Props) {
     const [selectedAttachment, setSelectedAttachment] = useState<ChatMessageAttachment | null>(null);
+    const [isCopied, setIsCopied] = useState(false);
+
+    const copyMessage = async () => {
+        try {
+            await navigator.clipboard.writeText(message.content);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (err) {
+            setIsCopied(false);
+        }
+    };
 
     const renderAttachmentIcon = (type: ChatMessageAttachment['type']) => {
         switch (type) {
@@ -29,6 +42,7 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                     message.role === 'assistant' ? 'w-full rounded-xl' : 'ml-auto w-fit rounded-xl',
                     message.role === 'assistant' ? 'bg-background' : 'self-end border border-border bg-muted/50 px-4 pt-2 pb-0.5 dark:bg-muted/30',
                     isStreaming && 'min-h-[100px]',
+                    'group/message',
                 )}
             >
                 <div
@@ -79,7 +93,51 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                         ))}
                     </div>
                 )}
-                {message.model?.name && <div className="mt-2 text-xs text-muted-foreground">{message.model.name}</div>}
+                {message.role === 'assistant' && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground opacity-0 transition-all duration-200 group-hover/message:opacity-100">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
+                                        title="Copy message"
+                                        onClick={copyMessage}
+                                    >
+                                        {isCopied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">Copy message</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
+                                        title="Branch off"
+                                        onClick={() => {
+                                            router.post(
+                                                route('chat.branch-off', { chat: message.chat_id, message: message.id }),
+                                                {
+                                                    preserveScroll: true,
+                                                },
+                                                {
+                                                    preserveState: false,
+                                                },
+                                            );
+                                        }}
+                                    >
+                                        <GitBranchIcon className="h-3.5 w-3.5" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">Branch off</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <div className="text-xs text-muted-foreground">{message.model?.name}</div>
+                    </div>
+                )}
                 {message.is_failed && <div className="mt-2 text-xs text-red-500">Something went wrong while generating the response</div>}
             </div>
             <AttachmentModal attachment={selectedAttachment} onClose={() => setSelectedAttachment(null)} />
