@@ -76,6 +76,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
     });
 
     useEcho(`chat.${chat.id}`, 'UserMessageSent', (e: { message: string }) => {
+        setIsGenerating(true);
         setMessages((prevMessages) => [
             ...prevMessages,
             {
@@ -162,7 +163,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                     )}
                 </ChatMessages>
 
-                <SendMessageForm chat={chat} models={models} onMessageSend={() => setIsGenerating(true)} />
+                <SendMessageForm chat={chat} models={models} onMessageSend={() => {}} />
             </main>
         </AppLayout>
     );
