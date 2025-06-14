@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Models;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Http\StreamedEvent;
 use Illuminate\Support\Facades\Log;
+use Prism\Prism\Enums\Provider;
 use Prism\Prism\Prism;
 
 class ChatTitleStreamController extends Controller
@@ -22,6 +24,7 @@ class ChatTitleStreamController extends Controller
                     event: 'title-update',
                     data: json_encode(['title' => $chat->title])
                 );
+
                 return;
             }
 
@@ -56,13 +59,13 @@ class ChatTitleStreamController extends Controller
         // Get the first message
         $firstMessage = $chat->messages()->where('role', 'user')->first();
 
-        if (!$firstMessage) {
+        if (! $firstMessage) {
             return;
         }
 
         try {
             $response = Prism::text()
-                ->using('openai', 'gpt-4.1-nano')
+                ->using(Provider::Gemini, Models::GEMINI_2_0_FLASH_LITE->value)
                 ->withSystemPrompt('Generate a concise, descriptive title (max 50 characters) for a chat that starts with the following message. Respond with only the title, no quotes or extra formatting.')
                 ->withPrompt($firstMessage->content)
                 ->asText();
@@ -71,7 +74,7 @@ class ChatTitleStreamController extends Controller
 
             // Ensure title length
             if (strlen($generatedTitle) > 50) {
-                $generatedTitle = substr($generatedTitle, 0, 47) . '...';
+                $generatedTitle = substr($generatedTitle, 0, 47).'...';
             }
 
             // Update the chat title
@@ -80,7 +83,7 @@ class ChatTitleStreamController extends Controller
             Log::info('Generated title for chat', ['chat_id' => $chat->id, 'title' => $generatedTitle]);
         } catch (\Exception $e) {
             // Fallback title on error
-            $fallbackTitle = substr($firstMessage->content, 0, 47) . '...';
+            $fallbackTitle = substr($firstMessage->content, 0, 47).'...';
             $chat->update(['title' => $fallbackTitle]);
             Log::error('Error generating title, using fallback', ['error' => $e->getMessage()]);
         }

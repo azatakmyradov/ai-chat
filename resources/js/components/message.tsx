@@ -1,18 +1,21 @@
 import { cn } from '@/lib/utils';
-import type { ChatMessage, ChatMessageAttachment } from '@/types';
+import type { ChatMessage, ChatMessageAttachment, Model } from '@/types';
 import { router } from '@inertiajs/react';
-import { Check, Copy, FileIcon, GitBranchIcon, ImageIcon } from 'lucide-react';
+import { Check, Copy, FileIcon, GitBranchIcon, ImageIcon, RefreshCcw } from 'lucide-react';
 import { memo, useState } from 'react';
 import { AttachmentModal } from './attachment-modal';
 import Markdown from './markdown';
+import { ModelSelector } from './model-selector';
+import { DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 type Props = {
     message: ChatMessage;
     isStreaming?: boolean;
+    models?: Model[];
 };
 
-const MessageComponent = memo(function MessageComponent({ message, isStreaming }: Props) {
+const MessageComponent = memo(function MessageComponent({ message, isStreaming, models }: Props) {
     const [selectedAttachment, setSelectedAttachment] = useState<ChatMessageAttachment | null>(null);
     const [isCopied, setIsCopied] = useState(false);
 
@@ -34,6 +37,18 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                 return <FileIcon className="h-4 w-4" />;
         }
     };
+
+    function handleRetry(model: Model): void {
+        router.post(
+            route('chat.retry-message', { chat: message.chat_id, message: message.id }),
+            {
+                model: model.id,
+            },
+            {
+                preserveState: false,
+            },
+        );
+    }
 
     return (
         <>
@@ -93,7 +108,7 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                         ))}
                     </div>
                 )}
-                {message.role === 'assistant' && (
+                {message.role === 'assistant' && !isStreaming && (
                     <div className="flex w-full flex-row items-center justify-start gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover/message:opacity-100">
                         <TooltipProvider>
                             <Tooltip>
@@ -117,22 +132,42 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                                         type="button"
                                         className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
                                         title="Branch off"
-                                        onClick={() => {
-                                            router.post(
-                                                route('chat.branch-off', { chat: message.chat_id, message: message.id }),
-                                                {
-                                                    preserveScroll: true,
-                                                },
-                                                {
-                                                    preserveState: false,
-                                                },
-                                            );
-                                        }}
+                                        onClick={() => router.post(route('chat.branch-off', { chat: message.chat_id, message: message.id }))}
                                     >
                                         <GitBranchIcon className="h-3.5 w-3.5" />
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom">Branch off</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    {message.model !== undefined && message.role === 'assistant' && (
+                                        <ModelSelector
+                                            selectedModel={message.model?.id}
+                                            models={models}
+                                            onSelect={handleRetry}
+                                            trigger={
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
+                                                    title="Retry message"
+                                                >
+                                                    <RefreshCcw className="h-3.5 w-3.5" />
+                                                    Retry
+                                                </button>
+                                            }
+                                        >
+                                            <DropdownMenuItem onClick={() => handleRetry(message.model as Model)}>
+                                                <RefreshCcw className="h-3.5 w-3.5" />
+                                                Retry same model
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                        </ModelSelector>
+                                    )}
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">Retry message</TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                         <div className="text-xs text-muted-foreground">{message.model?.name}</div>

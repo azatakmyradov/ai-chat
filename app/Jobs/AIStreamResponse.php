@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\AI\OpenRouter\OpenRouter;
 use App\Enums\Models;
+use App\Events\AIResponseCompleted;
 use App\Events\AIResponseFailed;
 use App\Events\AIResponseReceived;
 use App\Models\Chat;
@@ -56,15 +57,14 @@ class AIStreamResponse implements ShouldQueue
             ->asStream();
 
         try {
-            // Process each chunk as it arrives
             foreach ($response as $chunk) {
                 $content .= $chunk->text;
 
                 AIResponseReceived::dispatch($this->chat, $content, $chunk->text, $this->model->toArray());
 
                 if ($chunk->finishReason) {
-                    $this->createAssistantMessage($content);
-                    AIResponseReceived::dispatch($this->chat, $content, '</stream>', $this->model->toArray());
+                    $message = $this->createAssistantMessage($content);
+                    AIResponseCompleted::dispatch($this->chat, $message);
                 }
             }
         } catch (Exception) {

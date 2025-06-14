@@ -20,10 +20,10 @@ type PageProps = {
     messages: ChatMessageType[];
     chats: Chat[];
     models: Model[];
-    first_message: boolean;
+    show_loading_indicator: boolean;
 };
 
-export default function Show({ chat, messages: initialMessages, chats, models, first_message }: PageProps) {
+export default function Show({ chat, messages: initialMessages, chats, models, show_loading_indicator }: PageProps) {
     const [messages, setMessages] = useState(initialMessages);
     const [shouldGenerateTitle, setShouldGenerateTitle] = useState(false);
     const [shouldUpdateSidebar, setShouldUpdateSidebar] = useState(false);
@@ -41,10 +41,10 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
     const isStreaming = streaming.content.length > 0;
 
     useEffect(() => {
-        if (first_message) {
+        if (show_loading_indicator) {
             setIsGenerating(true);
         }
-    }, [first_message]);
+    }, [show_loading_indicator]);
 
     useEffect(() => {
         if (chat && chat.title === 'New Thread' && streaming.content.length > 0) {
@@ -60,24 +60,12 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
             content,
             model: model.id,
         }));
+    });
 
-        if (chunk.trim() === '</stream>') {
-            setIsGenerating(false);
-            setStreaming(() => ({ content: '', model: selectedModel }));
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                    id: new Date().toISOString(),
-                    role: 'assistant',
-                    user_id: page.props.auth.user.id,
-                    chat_id: chat.id,
-                    created_at: new Date(),
-                    updated_at: new Date(),
-                    model,
-                    content,
-                },
-            ]);
-        }
+    useEcho(`chat.${chat.id}`, 'AIResponseCompleted', ({ chat, message }: { chat: Chat; message: ChatMessage }) => {
+        setIsGenerating(false);
+        setStreaming(() => ({ content: '', model: selectedModel }));
+        setMessages((prevMessages) => [...prevMessages, message]);
     });
 
     useEcho(`chat.${chat.id}`, 'AIResponseFailed', ({ message }: { message?: ChatMessage }) => {
@@ -178,7 +166,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                     />
                 )}
 
-                <ChatMessages messages={messages} isStreaming={isStreaming}>
+                <ChatMessages messages={messages} isStreaming={isStreaming} models={models}>
                     {isGenerating && streaming.content.length === 0 && (
                         <div className="flex items-center gap-2 rounded-xl bg-background py-4">
                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -189,6 +177,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                     {streaming.content.length > 0 && (
                         <>
                             <Message
+                                models={models}
                                 message={{
                                     id: new Date().toISOString(),
                                     chat_id: chat.id,

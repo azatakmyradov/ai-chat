@@ -18,6 +18,7 @@ class CreateChatMessage
             'user_id' => user()->id,
             'content' => $request->get('message'),
             'role' => 'user',
+            'web_search' => $request->get('web_search') ?? false,
         ]);
 
         if ($request->hasFile('attachments')) {

@@ -4,16 +4,8 @@ import { Chat, Model, SharedData } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { Globe, PaperclipIcon, SendIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
+import { ModelSelector } from './model-selector';
 import { Button } from './ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
-    DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 import { Textarea } from './ui/textarea';
 
 type Props = {
@@ -33,25 +25,6 @@ export function SendMessageForm({ chat, models }: Props) {
     const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id ?? '');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const page = usePage<SharedData>();
-
-    // Group models by provider
-    const modelsByProvider = models.reduce(
-        (acc, model) => {
-            const provider = model.provider;
-            if (!acc[provider.id]) {
-                acc[provider.id] = {
-                    name: provider.name,
-                    models: [],
-                };
-            }
-            acc[provider.id].models.push(model);
-            return acc;
-        },
-        {} as Record<string, { name: string; models: Model[] }>,
-    );
-
-    // Get the currently selected model's name
-    const selectedModelName = models.find((m) => m.id === selectedModel)?.name ?? 'Select Model';
 
     const { data, setData, post } = useForm<{
         message: string;
@@ -194,35 +167,19 @@ export function SendMessageForm({ chat, models }: Props) {
                             <Globe className="size-4" />
                             <span className="hidden text-xs sm:block">Web Search</span>
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                        <ModelSelector
+                            selectedModel={selectedModel}
+                            models={models}
+                            onSelect={(model) => {
+                                setSelectedModel(model.id);
+                                setData('model', model.id);
+                            }}
+                            trigger={
                                 <Button variant="outline" size="sm" className="h-8 gap-1.5">
-                                    {selectedModel ? selectedModelName : 'Select Model'}
+                                    {models.find((m) => m.id === selectedModel)?.name ?? 'Select Model'}
                                 </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                {Object.entries(modelsByProvider).map(([providerId, { name: providerName, models: providerModels }]) => (
-                                    <DropdownMenuSub key={providerId}>
-                                        <DropdownMenuSubTrigger
-                                            className={cn(providerId === selectedModel?.split('/')[0] && 'bg-accent text-accent-foreground')}
-                                        >
-                                            {providerName}
-                                        </DropdownMenuSubTrigger>
-                                        <DropdownMenuSubContent>
-                                            {providerModels.map((model) => (
-                                                <DropdownMenuItem
-                                                    key={model.id}
-                                                    onClick={() => setSelectedModel(model.id)}
-                                                    className={cn(model.id === selectedModel && 'bg-accent text-accent-foreground')}
-                                                >
-                                                    {model.name}
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuSubContent>
-                                    </DropdownMenuSub>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                            }
+                        />
                     </div>
                     <Textarea
                         value={data.message}

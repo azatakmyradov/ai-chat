@@ -1,4 +1,4 @@
-import type { ChatMessage as ChatMessageType } from '@/types';
+import type { ChatMessage as ChatMessageType, Model } from '@/types';
 import 'highlight.js/styles/obsidian.css';
 import { ReactNode, useEffect, useRef } from 'react';
 import { Message } from './message';
@@ -8,9 +8,10 @@ type Props = {
     messages: ChatMessageType[];
     children: ReactNode;
     isStreaming?: boolean;
+    models?: Model[];
 };
 
-export function ChatMessages({ messages, children, isStreaming }: Props) {
+export function ChatMessages({ messages, children, isStreaming, models }: Props) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const lastMessageRef = useRef<HTMLDivElement>(null);
     const prevMessagesLengthRef = useRef(messages.length);
@@ -50,7 +51,12 @@ export function ChatMessages({ messages, children, isStreaming }: Props) {
                                     ref={index === messages.length - 1 ? lastMessageRef : undefined}
                                     className="min-h-[2rem]" // Ensure minimum height for each message
                                 >
-                                    <Message key={message.id} message={message} isStreaming={isStreaming && index === messages.length - 1} />
+                                    <Message
+                                        key={message.id}
+                                        message={message}
+                                        isStreaming={isStreaming && index === messages.length - 1}
+                                        models={models}
+                                    />
                                 </div>
                             ),
                     )}

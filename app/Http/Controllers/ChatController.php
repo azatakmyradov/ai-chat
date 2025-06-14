@@ -51,7 +51,7 @@ class ChatController extends Controller
             return back()->withErrors(['message' => 'Failed to create chat']);
         }
 
-        session()->flash('first_message', true);
+        session()->flash('show_loading_indicator', true);
 
         return redirect()
             ->route('chat.show', $chat);
@@ -80,7 +80,7 @@ class ChatController extends Controller
             'chats' => Auth::check() ? user()->chats()->latest()->latest('id')->get() : [],
             'messages' => $chat->messages,
             'models' => Models::getAvailableModels(),
-            'first_message' => session()->get('first_message', false),
+            'show_loading_indicator' => session()->get('show_loading_indicator', false),
         ]);
     }
 

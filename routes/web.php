@@ -6,6 +6,7 @@ use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatTitleStreamController;
+use App\Http\Controllers\RetryChatMessageController;
 use Illuminate\Support\Facades\Route;
 use Prism\Prism\Prism;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
@@ -21,8 +22,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/chat/{chat}/messages', ChatMessageController::class)
         ->only(['store']);
 
-    Route::post('/chat/{chat}/messages/{message}', BranchOffChatController::class)
+    Route::post('/chat/{chat}/messages/{message}/branch-off', BranchOffChatController::class)
         ->name('chat.branch-off');
+
+    Route::post('/chat/{chat}/messages/{message}/retry', RetryChatMessageController::class)
+        ->name('chat.retry-message');
 
     Route::get('/chat/{chat}/title-stream', ChatTitleStreamController::class)
         ->name('chat.title-stream');
@@ -31,8 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('attachments.show');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
 
 Route::get('/test', function () {
     $response = Prism::text()
