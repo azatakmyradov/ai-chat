@@ -8,6 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Model, SharedData, type Chat, type Message as MessageType } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 type PageProps = {
@@ -56,6 +57,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
         }));
 
         if (chunk.trim() === '</stream>') {
+            setIsGenerating(false);
             setStreaming(() => ({ content: '', model: selectedModel }));
             setMessages((prevMessages) => [
                 ...prevMessages,
@@ -89,12 +91,6 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
     });
 
     const messageContainerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (streaming.content.length > 0 && isGenerating) {
-            setIsGenerating(false);
-        }
-    }, [isGenerating, streaming.content]);
 
     useEffect(() => {
         if (messageContainerRef.current) {
@@ -142,28 +138,31 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
                 )}
 
                 <ChatMessages messages={messages} isStreaming={isStreaming}>
-                    <div className="mt-4 ml-4 max-w-xl self-start rounded-xl">
-                        {isGenerating && messages[messages.length - 1]?.role === 'user' && (
-                            <div className="size-8 animate-spin rounded-full border-4 border-blue-400 border-t-transparent pl-4"></div>
-                        )}
-                    </div>
+                    {isGenerating && streaming.content.length === 0 && (
+                        <div className="flex items-center gap-2 rounded-xl bg-background py-4">
+                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">AI is generating...</span>
+                        </div>
+                    )}
 
                     {streaming.content.length > 0 && (
-                        <Message
-                            message={{
-                                id: new Date().toISOString(),
-                                chat_id: chat.id,
-                                user_id: page.props.auth.user.id,
-                                role: 'assistant',
-                                content: streaming.content,
-                                model: models.find((model) => model.id === streaming.model) as Model,
-                            }}
-                            isStreaming={true}
-                        />
+                        <>
+                            <Message
+                                message={{
+                                    id: new Date().toISOString(),
+                                    chat_id: chat.id,
+                                    user_id: page.props.auth.user.id,
+                                    role: 'assistant',
+                                    content: streaming.content,
+                                    model: models.find((model) => model.id === streaming.model) as Model,
+                                }}
+                                isStreaming={true}
+                            />
+                        </>
                     )}
                 </ChatMessages>
 
-                <SendMessageForm chat={chat} models={models} />
+                <SendMessageForm chat={chat} models={models} onMessageSend={() => setIsGenerating(true)} />
             </main>
         </AppLayout>
     );
