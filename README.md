@@ -15,5 +15,5 @@ This is for the Cloneathon T3 Chat.
 - [x] Chat Sharing
 - [x] Bring Your Own Key
 - [x] Chat Branching
-- [ ] Web Search
+- [x] Web Search
 - [ ] Image Generation Support
