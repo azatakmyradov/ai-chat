@@ -9,9 +9,9 @@ enum Models: string
     case O4_MINI = 'openai/o4-mini';
     case O3_MINI = 'openai/o3-mini';
     case CLAUDE_3_5_SONNET = 'anthropic/claude-3.5-sonnet';
-    case CLAUDE_3_7_SONNET = 'anthropic/claude-3-7-sonnet-20250219';
-    case CLAUDE_4_0_SONNET = 'anthropic/claude-sonnet-4-20250514';
-    case CLAUDE_4_0_OPUS = 'anthropic/claude-opus-4-20250514';
+    case CLAUDE_3_7_SONNET = 'anthropic/claude-3.7-sonnet';
+    case CLAUDE_4_0_SONNET = 'anthropic/claude-sonnet-4';
+    case CLAUDE_4_0_OPUS = 'anthropic/claude-opus-4';
     case GEMINI_2_0_FLASH_LITE = 'google/gemini-2.0-flash-lite-001';
     case GEMINI_2_0_FLASH = 'google/gemini-2.0-flash-001';
     case GEMINI_2_5_PRO = 'google/gemini-2.5-pro-preview';
