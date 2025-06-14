@@ -18,3 +18,5 @@ WORKDIR /var/www/html
 RUN composer install --no-dev --prefer-dist --no-interaction
 
 RUN npm install && npm run build
+
+RUN php artisan storage:link

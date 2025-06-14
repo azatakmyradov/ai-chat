@@ -1,9 +1,15 @@
+volumes:
+  storage:
+
+
 services:
   app:
     build:
       context: .
       dockerfile: .docker/Dockerfile
     container_name: app
+    volumes:
+      - storage:/var/www/html/storage/
     expose:
       - 8080
 
