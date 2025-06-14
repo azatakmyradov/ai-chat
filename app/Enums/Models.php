@@ -2,18 +2,19 @@
 
 namespace App\Enums;
 
-use Prism\Prism\Enums\Provider;
-
 enum Models: string
 {
-    case GPT_4O_MINI = 'gpt-4o-mini';
-    case GPT_4_1_NANO = 'gpt-4.1-nano';
-    case O4_MINI = 'o4-mini';
-    case O3_MINI = 'o3-mini';
-    case CLAUDE_3_5_SONNET = 'claude-3-5-sonnet-20240620';
-    case CLAUDE_3_7_SONNET = 'claude-3-7-sonnet-20250219';
-    case CLAUDE_4_0_SONNET = 'claude-sonnet-4-20250514';
-    case CLAUDE_4_0_OPUS = 'claude-opus-4-20250514';
+    case GPT_4O_MINI = 'openai/gpt-4o-mini';
+    case GPT_4_1_NANO = 'openai/gpt-4.1-nano';
+    case O4_MINI = 'openai/o4-mini';
+    case O3_MINI = 'openai/o3-mini';
+    case CLAUDE_3_5_SONNET = 'anthropic/claude-3.5-sonnet';
+    case CLAUDE_3_7_SONNET = 'anthropic/claude-3-7-sonnet-20250219';
+    case CLAUDE_4_0_SONNET = 'anthropic/claude-sonnet-4-20250514';
+    case CLAUDE_4_0_OPUS = 'anthropic/claude-opus-4-20250514';
+    case GEMINI_2_0_FLASH_LITE = 'google/gemini-2.0-flash-lite-001';
+    case GEMINI_2_0_FLASH = 'google/gemini-2.0-flash-001';
+    case GEMINI_2_5_PRO = 'google/gemini-2.5-pro-preview';
 
     public static function getAvailableModels(): array
     {
@@ -34,6 +35,9 @@ enum Models: string
             self::CLAUDE_3_7_SONNET => 'Claude 3.7 Sonnet',
             self::CLAUDE_4_0_SONNET => 'Claude 4.0 Sonnet',
             self::CLAUDE_4_0_OPUS => 'Claude 4.0 Opus',
+            self::GEMINI_2_0_FLASH_LITE => 'Gemini 2.0 Flash Lite',
+            self::GEMINI_2_0_FLASH => 'Gemini 2.0 Flash',
+            self::GEMINI_2_5_PRO => 'Gemini 2.5 Pro',
         };
     }
 
@@ -48,20 +52,9 @@ enum Models: string
             self::CLAUDE_3_7_SONNET => 'High intelligence with toggleable extended thinking',
             self::CLAUDE_4_0_SONNET => 'High intelligence and balanced performanc',
             self::CLAUDE_4_0_OPUS => 'Highest level of intelligence and capability',
-        };
-    }
-
-    public function getProvider(): Provider
-    {
-        return match ($this) {
-            self::GPT_4O_MINI => Provider::OpenAI,
-            self::GPT_4_1_NANO => Provider::OpenAI,
-            self::O4_MINI => Provider::OpenAI,
-            self::O3_MINI => Provider::OpenAI,
-            self::CLAUDE_3_5_SONNET => Provider::Anthropic,
-            self::CLAUDE_3_7_SONNET => Provider::Anthropic,
-            self::CLAUDE_4_0_SONNET => Provider::Anthropic,
-            self::CLAUDE_4_0_OPUS => Provider::Anthropic,
+            self::GEMINI_2_0_FLASH_LITE => 'Gemini 2.0 Flash Lite',
+            self::GEMINI_2_0_FLASH => 'Gemini 2.0 Flash',
+            self::GEMINI_2_5_PRO => 'Gemini 2.5 Pro',
         };
     }
 
@@ -71,7 +64,6 @@ enum Models: string
             'id' => $this->value,
             'name' => $this->getName(),
             'description' => $this->getDescription(),
-            'provider' => $this->getProvider()->value,
         ];
     }
 }

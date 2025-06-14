@@ -25,9 +25,9 @@ class AIRequestThreadDescription implements ShouldQueue
     public function handle(): void
     {
         $response = Prism::text()
-            ->using('openai', 'gpt-4')
+            ->using('open-router', 'gpt-4')
             ->withSystemPrompt('You are a helpful assistant that creates a title for a chat thread.')
-            ->withPrompt('Create a title for the following chat thread: ' . $this->message)
+            ->withPrompt('Create a title for the following chat thread: '.$this->message)
             ->asText();
 
         $this->chat->update(['title' => $response->text]);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\AI\OpenRouter\OpenRouter;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
@@ -33,6 +34,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->configureModels();
         $this->configureUrl();
         $this->configureVite();
+        $this->configureAIProviders();
     }
 
     /**
@@ -84,5 +86,15 @@ final class AppServiceProvider extends ServiceProvider
     private function configureDates(): void
     {
         Date::use(CarbonImmutable::class);
+    }
+
+    private function configureAIProviders(): void
+    {
+        $this->app['prism-manager']->extend('open-router', function ($app, $config) {
+            return new OpenRouter(
+                apiKey: $config['api_key'] ?? '',
+                url: $config['url'],
+            );
+        });
     }
 }

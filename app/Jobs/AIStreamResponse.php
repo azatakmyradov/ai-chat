@@ -29,7 +29,7 @@ class AIStreamResponse implements ShouldQueue
         $content = '';
 
         $response = Prism::text()
-            ->using($this->model->getProvider(), $this->model->value)
+            ->using('open-router', $this->model->value)
             ->withSystemPrompt(view('prompts.system'))
             ->withMessages($this->buildConversationHistory())
             ->asStream();
