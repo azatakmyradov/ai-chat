@@ -11,11 +11,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 
 type Props = {
     message: ChatMessage;
-    isStreaming?: boolean;
     models?: Model[];
 };
 
-const MessageComponent = memo(function MessageComponent({ message, isStreaming, models }: Props) {
+const MessageComponent = memo(function MessageComponent({ message, models }: Props) {
     const [selectedAttachment, setSelectedAttachment] = useState<ChatMessageAttachment | null>(null);
     const [isCopied, setIsCopied] = useState(false);
 
@@ -55,9 +54,8 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming, 
             <div
                 className={cn(
                     message.role === 'assistant' ? 'w-full rounded-xl' : 'ml-auto w-fit rounded-xl',
-                    message.role === 'assistant' ? 'bg-background' : 'self-end border border-border bg-muted/50 px-4 pt-2 pb-0.5 dark:bg-muted/30',
-                    isStreaming && 'min-h-[100px]',
-                    'group/message relative',
+                    message.role === 'assistant' ? 'bg-background' : 'self-end border border-border bg-muted/50 dark:bg-muted/30',
+                    'group/message relative px-4 pt-2 pb-0.5',
                 )}
             >
                 <div
@@ -89,7 +87,6 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming, 
                         'prose-pre:min-h-[2.5rem] prose-pre:transition-all prose-pre:duration-200',
                         'prose-pre:overflow-x-auto prose-pre:whitespace-pre',
                         'prose-pre:code:min-h-[2.5rem] prose-pre:code:block',
-                        isStreaming && 'prose-pre:min-h-[100px]',
                     )}
                 >
                     <Markdown key={message.id} markdown={message.content} />
@@ -108,8 +105,8 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming, 
                         ))}
                     </div>
                 )}
-                {message.role === 'assistant' && !isStreaming && (
-                    <div className="flex w-full flex-row items-center justify-start gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover/message:opacity-100">
+                {message.role === 'assistant' && (
+                    <div className="flex w-full flex-row items-center justify-start gap-1 opacity-0 transition-opacity sm:group-hover/message:opacity-100">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -132,7 +129,15 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming, 
                                         type="button"
                                         className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
                                         title="Branch off"
-                                        onClick={() => router.post(route('chat.branch-off', { chat: message.chat_id, message: message.id }))}
+                                        onClick={() =>
+                                            router.post(
+                                                route('chat.branch-off', { chat: message.chat_id, message: message.id }),
+                                                {},
+                                                {
+                                                    preserveState: false,
+                                                },
+                                            )
+                                        }
                                     >
                                         <GitBranchIcon className="h-3.5 w-3.5" />
                                     </button>

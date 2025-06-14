@@ -167,13 +167,6 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                 )}
 
                 <ChatMessages messages={messages} isStreaming={isStreaming} models={models}>
-                    {isGenerating && streaming.content.length === 0 && (
-                        <div className="flex items-center gap-2 rounded-xl bg-background py-4">
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">AI is generating...</span>
-                        </div>
-                    )}
-
                     {streaming.content.length > 0 && (
                         <>
                             <Message
@@ -186,9 +179,14 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                                     content: streaming.content,
                                     model: models.find((model) => model.id === streaming.model) as Model,
                                 }}
-                                isStreaming={true}
                             />
                         </>
+                    )}
+                    {isGenerating && streaming.content.length === 0 && (
+                        <div className="flex items-center gap-2 rounded-xl bg-background py-4">
+                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">AI is generating...</span>
+                        </div>
                     )}
                 </ChatMessages>
 
