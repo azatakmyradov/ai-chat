@@ -12,24 +12,25 @@ import { useEcho } from '@laravel/echo-react';
 import { SendIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-export default function Show({
-    chat,
-    messages: initialMessages,
-    chats,
-    models,
-}: {
+type PageProps = {
     chat: Chat;
     messages: Message[];
     chats: Chat[];
     models: Model[];
-}) {
-    const [streamedContent, setStreamedContent] = useState('');
+    first_message: boolean;
+};
+
+export default function Show({ chat, messages: initialMessages, chats, models, first_message }: PageProps) {
     const [messages, setMessages] = useState(initialMessages);
     const [shouldGenerateTitle, setShouldGenerateTitle] = useState(false);
     const [shouldUpdateSidebar, setShouldUpdateSidebar] = useState(false);
     const [currentTitle, setCurrentTitle] = useState(chat.title);
     const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id || '');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [streaming, setStreaming] = useState({
+        content: '',
+        model: selectedModel,
+    });
 
     const page = usePage<SharedData>();
 
@@ -39,29 +40,39 @@ export default function Show({
     });
 
     useEffect(() => {
-        if (chat && chat.title === 'New Thread' && streamedContent.length > 0) {
+        if (first_message) {
+            setIsGenerating(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (chat && chat.title === 'New Thread' && streaming.content.length > 0) {
             setShouldGenerateTitle(true);
             setShouldUpdateSidebar(true);
         }
-    }, [chat, streamedContent]);
+    }, [chat, streaming.content]);
 
-    useEcho(`chat.${chat.id}`, 'AIResponseReceived', (e: { content: string; chunk: string; model: Model }) => {
-        if (e.chunk === '') return;
+    useEcho(`chat.${chat.id}`, 'AIResponseReceived', ({ content, chunk, model }: { content: string; chunk: string; model: Model }) => {
+        if (chunk === '') return;
 
-        setStreamedContent(() => e.content);
-        if (e.chunk.trim() === '</stream>') {
-            setStreamedContent(() => '');
+        setStreaming(() => ({
+            content,
+            model,
+        }));
+
+        if (chunk.trim() === '</stream>') {
+            setStreaming(() => ({ content: '', model: selectedModel }));
             setMessages((prevMessages) => [
                 ...prevMessages,
                 {
                     id: new Date().toISOString(),
-                    content: e.content,
                     role: 'assistant',
                     user_id: page.props.auth.user.id,
                     chat_id: Number(chat.id),
                     created_at: new Date(),
                     updated_at: new Date(),
-                    model: e.model,
+                    model,
+                    content,
                 },
             ]);
         }
@@ -85,10 +96,10 @@ export default function Show({
     const messageContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (streamedContent.length > 0 && isGenerating) {
+        if (streaming.content.length > 0 && isGenerating) {
             setIsGenerating(false);
         }
-    }, [streamedContent]);
+    }, [streaming.content]);
 
     useEffect(() => {
         if (messageContainerRef.current) {
@@ -102,6 +113,8 @@ export default function Show({
         if (data.message.trim()) {
             setData('model', selectedModel);
             post(`/chat/${chat.id}/messages`, {
+                async: true,
+                preserveState: true,
                 preserveScroll: true,
                 onSuccess: () => {
                     setData('message', '');
@@ -166,15 +179,16 @@ export default function Show({
                                         </div>
                                     ),
                             )}
-                            <div className="self-start ml-4 max-w-xl rounded-xl">
-                                {isGenerating && (
+                            <div className="self-start mt-4 ml-4 max-w-xl rounded-xl">
+                                {isGenerating && messages[messages.length - 1]?.role === 'user' && (
                                     <div className="pl-4 rounded-full border-4 border-blue-400 animate-spin size-8 border-t-transparent"></div>
                                 )}
                             </div>
 
-                            {streamedContent.length > 0 && (
+                            {streaming.content.length > 0 && (
                                 <div className="self-start p-4 max-w-xl rounded-xl border border-border bg-muted/10 dark:bg-muted/30">
-                                    <div className="whitespace-pre-wrap text-foreground">{streamedContent}</div>
+                                    <div className="whitespace-pre-wrap text-foreground">{streaming.content}</div>
+                                    <div className="text-xs text-muted-foreground">{models.find((model) => model.id === streaming.model)?.name}</div>
                                 </div>
                             )}
                         </div>

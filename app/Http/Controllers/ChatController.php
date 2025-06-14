@@ -37,7 +37,10 @@ class ChatController extends Controller
 
         AIStreamResponse::dispatch($chat, $request->get('message'), Models::from($request->get('model')));
 
-        return redirect()->route('chat.show', $chat);
+        session()->flash('first_message', true);
+
+        return redirect()
+            ->route('chat.show', $chat);
     }
 
     /**
@@ -52,6 +55,7 @@ class ChatController extends Controller
             'chats' => user()->chats()->latest()->latest('id')->get(),
             'messages' => $chat->messages()->with('user')->get(),
             'models' => Models::getAvailableModels(),
+            'first_message' => session()->get('first_message', false),
         ]);
     }
 
