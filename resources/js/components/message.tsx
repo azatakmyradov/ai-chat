@@ -94,7 +94,7 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
                     </div>
                 )}
                 {message.role === 'assistant' && (
-                    <div className="absolute left-0 mt-2 -ml-0.5 flex w-full flex-row items-center justify-start gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover/message:opacity-100">
+                    <div className="flex w-full flex-row items-center justify-start gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover/message:opacity-100">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
