@@ -52,7 +52,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, f
 
         setStreaming(() => ({
             content,
-            model,
+            model: model.id,
         }));
 
         if (chunk.trim() === '</stream>') {

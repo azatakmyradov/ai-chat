@@ -12,7 +12,7 @@ const MessageComponent = memo(function MessageComponent({ message, isStreaming }
     return (
         <div
             className={cn(
-                'w-full rounded-xl',
+                message.role === 'assistant' ? 'w-full rounded-xl' : 'ml-auto w-fit rounded-xl',
                 message.role === 'assistant' ? 'bg-background' : 'self-end border border-border bg-muted/50 px-4 pt-2 pb-0.5 dark:bg-muted/30',
                 isStreaming && 'min-h-[100px]',
             )}
