@@ -22,7 +22,10 @@ export function NavChats({ chats = [] }: { chats: Chat[] }) {
                     <SidebarMenuItem key={chat.id}>
                         <SidebarMenuButton asChild isActive={page.url.startsWith(`/chat/${chat.id}`)}>
                             <button
-                                onClick={() => {
+                                type="button"
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     router.visit(route('chat.show', { chat: chat.id }));
                                 }}
                                 className="flex justify-between items-center group/chat"
@@ -35,10 +38,10 @@ export function NavChats({ chats = [] }: { chats: Chat[] }) {
                                                     <button
                                                         type="button"
                                                         className="group/branch"
-                                                        onClick={(e) => {
+                                                        onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            router.get(route('chat.show', { chat: chat.branch_chat_id }), {}, { prefetch: true });
+                                                            router.visit(route('chat.show', { chat: chat.branch_chat_id }));
                                                         }}
                                                     >
                                                         <GitBranchIcon className="w-4 h-4 text-gray-500 opacity-75 transition-all duration-300 group-hover/branch:text-primary group-hover/chat:opacity-100" />
@@ -78,7 +81,7 @@ function DeleteChatButton({ chat }: { chat: Chat }) {
         <div className="hidden group-hover/chat:block">
             <button
                 className="p-1 text-gray-500 rounded-md dark:text-gray-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-                onClick={(e) => {
+                onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setOpen(() => true);
