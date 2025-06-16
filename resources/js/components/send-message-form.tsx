@@ -2,7 +2,7 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { cn } from '@/lib/utils';
 import { Chat, Model, SharedData } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
-import { Globe, PaperclipIcon, SendIcon, XIcon } from 'lucide-react';
+import { Globe, PaperclipIcon, SendIcon, StopCircle, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { ModelSelector } from './model-selector';
 import { Button } from './ui/button';
@@ -11,6 +11,7 @@ import { Textarea } from './ui/textarea';
 type Props = {
     chat?: Chat;
     models: Model[];
+    disabled: boolean;
 };
 
 const ACCEPTED_FILE_TYPES = {
@@ -21,12 +22,12 @@ const ACCEPTED_FILE_TYPES = {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-export function SendMessageForm({ chat, models }: Props) {
+export function SendMessageForm({ chat, models, disabled }: Props) {
     const [selectedModel, setSelectedModel] = useLocalStorage('selectedModel', models[0]?.id ?? '');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const page = usePage<SharedData>();
 
-    const { data, setData, post } = useForm<{
+    const { data, setData, post, processing } = useForm<{
         message: string;
         model: string;
         attachments: File[];
@@ -79,6 +80,9 @@ export function SendMessageForm({ chat, models }: Props) {
     };
 
     const handleSubmit = (e: React.FormEvent) => {
+        if (processing || disabled) {
+            return;
+        }
         e.preventDefault();
         if (data.message.trim() || data.attachments.length > 0) {
             setData('model', selectedModel);
@@ -110,9 +114,9 @@ export function SendMessageForm({ chat, models }: Props) {
 
     if (!page.props.auth.user?.openrouter_api_key) {
         return (
-            <div className="mx-auto w-full max-w-3xl px-4">
+            <div className="px-4 mx-auto w-full max-w-3xl">
                 <div className="flex flex-col gap-2">
-                    <p className="mb-4 text-center text-sm text-muted-foreground">
+                    <p className="mb-4 text-sm text-center text-muted-foreground">
                         You need to set your OpenRouter API key in your profile to use this feature.
                     </p>
                 </div>
@@ -121,22 +125,22 @@ export function SendMessageForm({ chat, models }: Props) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl px-4">
-            <div className="relative flex flex-col gap-2">
+        <form onSubmit={handleSubmit} className="px-4 mx-auto w-full max-w-3xl">
+            <div className="flex relative flex-col gap-2">
                 {selectedFiles.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-2">
                         {selectedFiles.map((file, index) => (
-                            <div key={index} className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm">
+                            <div key={index} className="flex gap-1 items-center py-1 px-2 text-sm rounded-md bg-muted">
                                 <span className="max-w-[200px] truncate">{file.name}</span>
                                 <button type="button" onClick={() => removeFile(index)} className="text-muted-foreground hover:text-foreground">
-                                    <XIcon className="h-4 w-4" />
+                                    <XIcon className="w-4 h-4" />
                                 </button>
                             </div>
                         ))}
                     </div>
                 )}
-                <div className="relative flex items-end gap-2">
-                    <div className="absolute bottom-2 left-2 flex items-center gap-2">
+                <div className="flex relative gap-2 items-end">
+                    <div className="flex absolute bottom-2 left-2 gap-2 items-center">
                         <div className="relative">
                             <input
                                 type="file"
@@ -152,7 +156,7 @@ export function SendMessageForm({ chat, models }: Props) {
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-10 w-10"
+                                className="w-10 h-10"
                                 onClick={() => document.getElementById('file-upload')?.click()}
                             >
                                 <PaperclipIcon className="size-4" />
@@ -175,7 +179,7 @@ export function SendMessageForm({ chat, models }: Props) {
                                 setData('model', model.id);
                             }}
                             trigger={
-                                <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                                <Button variant="outline" size="sm" className="gap-1.5 h-8">
                                     {models.find((m) => m.id === selectedModel)?.name ?? 'Select Model'}
                                 </Button>
                             }
@@ -198,8 +202,13 @@ export function SendMessageForm({ chat, models }: Props) {
                         autoFocus
                     />
                     <div className="absolute right-2 bottom-2">
-                        <Button type="submit" className="h-10 px-4" size="icon" disabled={!data.message.trim() && data.attachments.length === 0}>
-                            <SendIcon className="h-4 w-4" />
+                        <Button
+                            type="submit"
+                            className="px-4 h-10"
+                            size="icon"
+                            disabled={(!data.message.trim() && data.attachments.length === 0) || processing || disabled}
+                        >
+                            {processing || disabled ? <StopCircle /> : <SendIcon className="w-4 h-4" />}
                         </Button>
                     </div>
                 </div>
