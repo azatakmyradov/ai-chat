@@ -190,7 +190,7 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
                         onChange={(e) => setData('message', e.target.value)}
                         placeholder="Type your message..."
                         className={cn(
-                            'min-h-[120px] w-full resize-none rounded-lg border bg-background pb-16 focus-visible:ring-1',
+                            'min-h-[120px] w-full resize-none rounded-lg border bg-background pr-2 pb-16 pl-2 focus-visible:ring-1',
                             selectedFiles.length > 0 && 'pb-20',
                         )}
                         onKeyDown={(e) => {
@@ -202,7 +202,7 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
                         }}
                         autoFocus
                     />
-                    <div className="absolute right-2 bottom-2">
+                    <div className="absolute right-4 bottom-2 z-10">
                         <Button
                             type="submit"
                             className="h-10 px-4"
