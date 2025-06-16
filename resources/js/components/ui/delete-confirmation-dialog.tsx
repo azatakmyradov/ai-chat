@@ -33,7 +33,7 @@ export function DeleteConfirmationDialog({
 }: DeleteConfirmationDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <AlertDialogContent className="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <AlertDialogHeader>
                     <AlertDialogTitle className="text-gray-900 dark:text-gray-100">
                         {title}
@@ -43,13 +43,13 @@ export function DeleteConfirmationDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 {children}
-                <AlertDialogFooter className="gap-2 sm:gap-0">
-                    <AlertDialogCancel className="mt-0 bg-gray-100 hover:bg-gray-200 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100">
+                <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel className="mt-0 text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600">
                         {cancelText}
                     </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
-                        className="bg-red-600 hover:bg-red-700 text-white focus:ring-red-600 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-700"
+                        className="text-white bg-red-600 dark:bg-red-700 hover:bg-red-700 focus:ring-red-600 dark:hover:bg-red-800 dark:focus:ring-red-700"
                     >
                         {confirmText}
                     </AlertDialogAction>
@@ -57,4 +57,4 @@ export function DeleteConfirmationDialog({
             </AlertDialogContent>
         </AlertDialog>
     );
-} 
+}
