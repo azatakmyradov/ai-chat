@@ -111,22 +111,28 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
             {
                 preserveState: true,
                 preserveScroll: true,
+                onSuccess() {
+                    if (checked) {
+                        navigator.clipboard.writeText(window.location.href);
+                        toast.success('Chat URL copied to clipboard');
+                    }
+                },
             },
         );
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
-            <div className="flex relative flex-col h-full">
+            <div className="relative flex h-full flex-col">
                 <Head title={currentTitle} />
 
-                <div className="flex justify-between items-center py-2 px-4 mx-auto w-full max-w-3xl">
-                    <div className="flex gap-2 items-center">
+                <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-2">
+                    <div className="flex items-center gap-2">
                         {shouldGenerateTitle && chat && (
                             <TitleGenerator
                                 chatId={chat.id}
                                 onTitleUpdate={(newTitle) => {
-                                    document.title = `${newTitle} - LaraChat`;
+                                    document.title = `${newTitle} - AI Chat`;
                                     setCurrentTitle(newTitle);
                                 }}
                                 onComplete={() => {
@@ -135,25 +141,6 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                             />
                         )}
                     </div>
-
-                    {page.props.auth.user && (
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="flex gap-2 items-center">
-                                        <Switch id="public-toggle" checked={isPublic} onCheckedChange={handlePublicToggle} />
-                                        <Label htmlFor="public-toggle" className="flex gap-1 items-center cursor-pointer">
-                                            <Globe className="w-4 h-4" />
-                                            <span className="text-sm">Public</span>
-                                        </Label>
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Make this chat visible to everyone</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    )}
                 </div>
 
                 {/* Sidebar title updater - separate EventStream for sidebar */}
@@ -166,7 +153,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                     />
                 )}
 
-                <ChatMessages messages={messages} isStreaming={isStreaming} models={models}>
+                <ChatMessages messages={messages} isStreaming={isStreaming} models={models} className="mt-10">
                     {streaming.content.length > 0 && (
                         <>
                             <Message
@@ -184,15 +171,35 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                         </>
                     )}
                     {isGenerating && streaming.content.length === 0 && (
-                        <div className="flex gap-2 items-center py-4 rounded-xl bg-background">
-                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                        <div className="flex items-center gap-2 rounded-xl bg-background py-4">
+                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">AI is generating...</span>
                         </div>
                     )}
                 </ChatMessages>
 
                 {page.props.auth.user && (
-                    <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-border bg-background md:left-64">
+                    <div className="fixed right-0 bottom-0 left-0 border-t border-border bg-background/10 p-4 backdrop-blur-sm md:left-64">
+                        <div className="mx-auto flex max-w-3xl justify-end px-4 pb-4">
+                            {page.props.auth.user && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="flex items-center gap-2">
+                                                <Switch id="public-toggle" checked={isPublic} onCheckedChange={handlePublicToggle} />
+                                                <Label htmlFor="public-toggle" className="flex cursor-pointer items-center gap-1">
+                                                    <Globe className="h-4 w-4" />
+                                                    <span className="text-sm">Public</span>
+                                                </Label>
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Make this chat visible to everyone</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
+                        </div>
                         <SendMessageForm chat={chat} models={models} disabled={isGenerating} />
                     </div>
                 )}

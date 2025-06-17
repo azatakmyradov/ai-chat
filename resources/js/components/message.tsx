@@ -33,9 +33,9 @@ const MessageComponent = memo(function MessageComponent({ message, models, isStr
     const renderAttachmentIcon = (type: ChatMessageAttachment['type']) => {
         switch (type) {
             case 'image':
-                return <ImageIcon className="h-4 w-4" />;
+                return <ImageIcon className="w-4 h-4" />;
             default:
-                return <FileIcon className="h-4 w-4" />;
+                return <FileIcon className="w-4 h-4" />;
         }
     };
 
@@ -85,12 +85,12 @@ const MessageComponent = memo(function MessageComponent({ message, models, isStr
                     <Markdown key={message.id} markdown={message.content} isStreaming={isStreaming} />
                 </div>
                 {message.attachments && message.attachments.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 my-2">
                         {message.attachments.map((attachment) => (
                             <button
                                 key={attachment.id}
                                 onClick={() => setSelectedAttachment(attachment)}
-                                className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                                className="flex gap-1.5 items-center py-1 px-2 text-xs rounded-md border border-border bg-background text-muted-foreground hover:bg-muted"
                             >
                                 {renderAttachmentIcon(attachment.type)}
                                 {attachment.file_name}
@@ -99,17 +99,17 @@ const MessageComponent = memo(function MessageComponent({ message, models, isStr
                     </div>
                 )}
                 {message.role === 'assistant' && (
-                    <div className="flex w-full flex-row items-center justify-start gap-1">
+                    <div className="flex flex-row gap-1 justify-start items-center w-full">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <button
                                         type="button"
-                                        className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
+                                        className="flex gap-1.5 items-center py-1 px-2 text-xs rounded-md border border-transparent transition-colors bg-background text-muted-foreground hover:border-border hover:bg-muted"
                                         title="Copy message"
                                         onClick={copyMessage}
                                     >
-                                        {isCopied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                        {isCopied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom">Copy message</TooltipContent>
@@ -120,7 +120,7 @@ const MessageComponent = memo(function MessageComponent({ message, models, isStr
                                 <TooltipTrigger asChild>
                                     <button
                                         type="button"
-                                        className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
+                                        className="flex gap-1.5 items-center py-1 px-2 text-xs rounded-md border border-transparent transition-colors bg-background text-muted-foreground hover:border-border hover:bg-muted"
                                         title="Branch off"
                                         onClick={() =>
                                             router.post(
@@ -132,7 +132,7 @@ const MessageComponent = memo(function MessageComponent({ message, models, isStr
                                             )
                                         }
                                     >
-                                        <GitBranchIcon className="h-3.5 w-3.5" />
+                                        <GitBranchIcon className="w-3.5 h-3.5" />
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom">Branch off</TooltipContent>
@@ -149,15 +149,15 @@ const MessageComponent = memo(function MessageComponent({ message, models, isStr
                                             trigger={
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-1.5 rounded-md border border-transparent bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted"
+                                                    className="flex gap-1.5 items-center py-1 px-2 text-xs rounded-md border border-transparent transition-colors bg-background text-muted-foreground hover:border-border hover:bg-muted"
                                                     title="Retry message"
                                                 >
-                                                    <RefreshCcw className="h-3.5 w-3.5" />
+                                                    <RefreshCcw className="w-3.5 h-3.5" />
                                                 </button>
                                             }
                                         >
                                             <DropdownMenuItem onClick={() => handleRetry(message.model as Model)}>
-                                                <RefreshCcw className="h-3.5 w-3.5" />
+                                                <RefreshCcw className="w-3.5 h-3.5" />
                                                 Retry same model
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
