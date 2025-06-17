@@ -21,3 +21,12 @@ services:
     volumes:
       - storage:/var/www/html/storage/
     command: php artisan horizon
+
+  nightwatch:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    container_name: nightwatch
+    volumes:
+      - storage:/var/www/html/storage/
+    command: php artisan nightwatch:agent

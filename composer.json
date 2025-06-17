@@ -13,6 +13,7 @@
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.33",
+        "laravel/nightwatch": "^1.7",
         "laravel/tinker": "^2.10.1",
         "predis/predis": "^3.0",
         "prism-php/prism": "^0.69.0",
