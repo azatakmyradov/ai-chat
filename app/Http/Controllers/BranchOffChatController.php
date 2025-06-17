@@ -24,7 +24,7 @@ class BranchOffChatController extends Controller
 
             $message->attachments()->each(function (ChatMessageAttachment $attachment) use ($newMessage) {
                 $newAttachment = $attachment->replicate();
-                $newAttachment->message_id = $newMessage->id;
+                $newAttachment->chat_message_id = $newMessage->id;
                 $newAttachment->save();
             });
         });
