@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils';
 import type { ChatMessage as ChatMessageType, Model } from '@/types';
-import 'highlight.js/styles/obsidian.css';
 import { ReactNode, useRef } from 'react';
 import { Message } from './message';
 
@@ -17,7 +16,7 @@ export function ChatMessages({ messages, children, isStreaming, models, classNam
 
     return (
         <div className={cn('mx-auto mt-2 w-full flex-1 overflow-y-auto', className)}>
-            <div className="flex flex-col gap-4 px-4 pb-64 mx-auto w-full max-w-3xl min-h-full">
+            <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-4 px-4 pb-64">
                 {messages.map(
                     (message, index) =>
                         message.content.length > 0 && (

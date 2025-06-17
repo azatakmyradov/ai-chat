@@ -1,3 +1,4 @@
+import { useAppearance } from '@/hooks/use-appearance';
 import { transformerCopyButton } from '@rehype-pretty/transformers';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import rehypePrettyCode from 'rehype-pretty-code';
@@ -5,12 +6,11 @@ import rehypeStringify from 'rehype-stringify';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
-import { useAppearance } from '@/hooks/use-appearance';
 
 export function Markdown({ markdown, isStreaming = false }: { markdown: string; isStreaming?: boolean }) {
     const [highlightedCode, setHighlightedCode] = useState('');
     const { appearance } = useAppearance();
-    
+
     // Determine current theme
     const isDark = useMemo(() => {
         if (typeof window === 'undefined') return false;
@@ -20,32 +20,27 @@ export function Markdown({ markdown, isStreaming = false }: { markdown: string; 
     }, [appearance]);
 
     // Process markdown - skip highlighting during streaming
-    const processMarkdown = useCallback(async (content: string, darkMode: boolean) => {
-        try {
-            if (isStreaming) {
-                // During streaming, just show plain text with basic formatting
-                const plainText = content
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/\n/g, '<br>');
-                setHighlightedCode(`<div class="whitespace-pre-wrap font-mono text-sm">${plainText}</div>`);
-            } else {
-                // Only highlight when not streaming
-                const result = await highlightCode(content, darkMode);
-                setHighlightedCode(result);
+    const processMarkdown = useCallback(
+        async (content: string, darkMode: boolean) => {
+            try {
+                if (isStreaming) {
+                    // During streaming, just show plain text with basic formatting
+                    const plainText = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+                    setHighlightedCode(`<div class="whitespace-pre-wrap font-mono text-sm">${plainText}</div>`);
+                } else {
+                    // Only highlight when not streaming
+                    const result = await highlightCode(content, darkMode);
+                    setHighlightedCode(result);
+                }
+            } catch (error) {
+                console.error('Markdown processing failed:', error);
+                // Fallback to simple HTML with line breaks
+                const fallback = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+                setHighlightedCode(`<div class="whitespace-pre-wrap">${fallback}</div>`);
             }
-        } catch (error) {
-            console.error('Markdown processing failed:', error);
-            // Fallback to simple HTML with line breaks
-            const fallback = content
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\n/g, '<br>');
-            setHighlightedCode(`<div class="whitespace-pre-wrap">${fallback}</div>`);
-        }
-    }, [isStreaming]);
+        },
+        [isStreaming],
+    );
 
     // Effect to process markdown when content, theme, or streaming state changes
     useEffect(() => {
@@ -116,11 +111,8 @@ async function highlightCode(markdown: string, isDark: boolean) {
     } catch (error) {
         console.error('Syntax highlighting failed:', error);
         // Fallback to basic markdown processing
-        const processor = unified()
-            .use(remarkParse)
-            .use(remarkRehype)
-            .use(rehypeStringify);
-        
+        const processor = unified().use(remarkParse).use(remarkRehype).use(rehypeStringify);
+
         const result = await processor.process(markdown);
         return String(result);
     }
