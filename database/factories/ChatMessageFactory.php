@@ -23,6 +23,8 @@ class ChatMessageFactory extends Factory
             'user_id' => User::factory(),
             'role' => fake()->randomElement(['assistant', 'user']),
             'content' => fake()->paragraph,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

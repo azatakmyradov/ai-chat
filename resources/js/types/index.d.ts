@@ -85,3 +85,5 @@ export interface Model {
     description: string;
     provider: ModelProvider;
 }
+
+export type SidebarChats = Record<'today' | 'yesterday' | 'last_week' | 'last_month' | 'older', Chat[]>;

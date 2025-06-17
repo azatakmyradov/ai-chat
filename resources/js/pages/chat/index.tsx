@@ -1,7 +1,12 @@
 import { SendMessageForm } from '@/components/send-message-form';
 import AppLayout from '@/layouts/app-layout';
-import { Chat, Model, type BreadcrumbItem } from '@/types';
+import { Model, SidebarChats, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+
+type Props = {
+    chats: SidebarChats;
+    models: Model[];
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -10,7 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({ chats, models }: { chats: Chat[]; models: Model[] }) {
+export default function Index({ chats, models }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
             <Head title="New Chat" />

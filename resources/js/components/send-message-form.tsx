@@ -11,7 +11,7 @@ import { Textarea } from './ui/textarea';
 type Props = {
     chat?: Chat;
     models: Model[];
-    disabled: boolean;
+    disabled?: boolean;
 };
 
 const ACCEPTED_FILE_TYPES = {

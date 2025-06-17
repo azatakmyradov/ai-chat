@@ -24,7 +24,15 @@ class ChatController extends Controller
     public function index()
     {
         return inertia('chat/index', [
-            'chats' => user()->chats()->latest()->latest('id')->get(),
+            'chats' => user()->chats()->latest()->latest('id')->get()->groupBy(function ($chat) {
+                return match (true) {
+                    $chat->created_at->isToday() => 'today',
+                    $chat->created_at->isYesterday() => 'yesterday',
+                    $chat->created_at->isBefore(now()->subDays(7)) => 'last_week',
+                    $chat->created_at->isBefore(now()->subDays(30)) => 'last_month',
+                    default => 'older',
+                };
+            }),
             'models' => Models::getAvailableModels(),
         ]);
     }
@@ -77,7 +85,15 @@ class ChatController extends Controller
 
         return inertia('chat/show', [
             'chat' => $chat,
-            'chats' => Auth::check() ? user()->chats()->latest()->latest('id')->get() : [],
+            'chats' => Auth::check() ? user()->chats()->latest()->latest('id')->get()->groupBy(function ($chat) {
+                return match (true) {
+                    $chat->created_at->isToday() => 'today',
+                    $chat->created_at->isYesterday() => 'yesterday',
+                    $chat->created_at->isBefore(now()->subDays(7)) => 'last_week',
+                    $chat->created_at->isBefore(now()->subDays(30)) => 'last_month',
+                    default => 'older',
+                };
+            }) : [],
             'messages' => $chat->messages,
             'models' => Models::getAvailableModels(),
             'show_loading_indicator' => session()->get('show_loading_indicator', false),

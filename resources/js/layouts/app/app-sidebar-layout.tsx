@@ -2,14 +2,14 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
-import { Chat, type BreadcrumbItem } from '@/types';
+import { SidebarChats, type BreadcrumbItem } from '@/types';
 import { type PropsWithChildren } from 'react';
 
 export default function AppSidebarLayout({
     children,
     breadcrumbs = [],
     chats,
-}: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[]; chats?: Chat[] }>) {
+}: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[]; chats?: SidebarChats }>) {
     return (
         <AppShell variant="sidebar">
             <AppSidebar chats={chats} />

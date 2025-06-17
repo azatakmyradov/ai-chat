@@ -1,7 +1,7 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Chat, SharedData, type NavItem } from '@/types';
+import { SharedData, SidebarChats, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -16,8 +16,8 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-export function AppSidebar({ chats: initialChats }: { chats?: Chat[] }) {
-    const [chats, setChats] = useState(initialChats);
+export function AppSidebar({ chats: initialChats }: { chats?: SidebarChats }) {
+    const [chats, setChats] = useState<SidebarChats>(initialChats ?? ({} as SidebarChats));
     const props = usePage<SharedData>();
 
     // Listen for title updates from EventStream
@@ -26,7 +26,17 @@ export function AppSidebar({ chats: initialChats }: { chats?: Chat[] }) {
             const { chatId, newTitle } = event.detail;
 
             // Update local state
-            setChats((prevChats) => prevChats?.map((chat) => (chat.id === chatId ? { ...chat, title: newTitle } : chat)));
+            setChats((prevChats) => {
+                Object.entries(prevChats ?? {}).forEach(([key, chats]) => {
+                    chats.forEach((chat) => {
+                        if (chat.id === chatId) {
+                            chat.title = newTitle;
+                        }
+                    });
+                });
+
+                return prevChats;
+            });
         };
 
         window.addEventListener('chatTitleUpdated', handleTitleUpdate as EventListener);
