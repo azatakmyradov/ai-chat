@@ -1,6 +1,6 @@
 import type { ChatMessage as ChatMessageType, Model } from '@/types';
 import 'highlight.js/styles/obsidian.css';
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useRef } from 'react';
 import { Message } from './message';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -12,37 +12,12 @@ type Props = {
 };
 
 export function ChatMessages({ messages, children, isStreaming, models }: Props) {
-    const scrollRef = useRef<HTMLDivElement>(null);
     const lastMessageRef = useRef<HTMLDivElement>(null);
-    const prevMessagesLengthRef = useRef(messages.length);
-
-    // Smooth scroll to bottom when new messages arrive or during streaming
-    useEffect(() => {
-        if (!scrollRef.current) return;
-
-        const scrollContainer = scrollRef.current;
-        const isNewMessage = messages.length > prevMessagesLengthRef.current;
-        const shouldAutoScroll =
-            isNewMessage || // Always scroll on new message
-            (isStreaming && scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100); // Scroll during streaming if near bottom
-
-        if (shouldAutoScroll) {
-            // Use requestAnimationFrame to ensure smooth scrolling
-            requestAnimationFrame(() => {
-                scrollContainer.scrollTo({
-                    top: scrollContainer.scrollHeight,
-                    behavior: isStreaming ? 'smooth' : 'auto',
-                });
-            });
-        }
-
-        prevMessagesLengthRef.current = messages.length;
-    }, [messages, isStreaming]);
 
     return (
-        <div className="mx-auto mt-2 min-h-[calc(100vh-16rem)] w-full flex-1">
-            <ScrollArea ref={scrollRef} className="h-[calc(100vh-16rem)] w-full">
-                <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-4 px-4 pb-32">
+        <div className="flex-1 mx-auto mt-2 w-full min-h-[calc(100vh-16rem)]">
+            <ScrollArea className="w-full h-[calc(100vh-16rem)]">
+                <div className="flex flex-col gap-4 px-4 pb-32 mx-auto w-full max-w-3xl min-h-full">
                     {messages.map(
                         (message, index) =>
                             message.content.length > 0 && (

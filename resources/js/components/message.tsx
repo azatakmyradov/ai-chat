@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ChatMessage, ChatMessageAttachment, Model } from '@/types';
 import { router } from '@inertiajs/react';
+import 'flowtoken/dist/styles.css';
 import { Check, Copy, FileIcon, GitBranchIcon, ImageIcon, RefreshCcw } from 'lucide-react';
 import { memo, useState } from 'react';
 import { AttachmentModal } from './attachment-modal';
@@ -12,9 +13,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 type Props = {
     message: ChatMessage;
     models?: Model[];
+    isStreaming?: boolean;
 };
 
-const MessageComponent = memo(function MessageComponent({ message, models }: Props) {
+const MessageComponent = memo(function MessageComponent({ message, models, isStreaming }: Props) {
     const [selectedAttachment, setSelectedAttachment] = useState<ChatMessageAttachment | null>(null);
     const [isCopied, setIsCopied] = useState(false);
 
@@ -23,7 +25,7 @@ const MessageComponent = memo(function MessageComponent({ message, models }: Pro
             await navigator.clipboard.writeText(message.content);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
-        } catch (err) {
+        } catch {
             setIsCopied(false);
         }
     };
@@ -80,7 +82,7 @@ const MessageComponent = memo(function MessageComponent({ message, models }: Pro
                         'prose-hr:my-6 prose-hr:border-border',
                     )}
                 >
-                    <Markdown key={message.id} markdown={message.content} />
+                    <Markdown key={message.id} markdown={message.content} isStreaming={isStreaming} />
                 </div>
                 {message.attachments && message.attachments.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">

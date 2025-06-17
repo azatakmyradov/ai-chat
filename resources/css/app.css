@@ -451,3 +451,239 @@
     @apply bg-background text-foreground;
     }
 }
+
+/* Markdown Content Styles */
+@layer components {
+  .markdown-content {
+    @apply prose prose-sm max-w-none;
+    
+    /* Typography */
+    --prose-body: theme(colors.foreground);
+    --prose-headings: theme(colors.foreground);
+    --prose-lead: theme(colors.muted.foreground);
+    --prose-links: theme(colors.primary.DEFAULT);
+    --prose-bold: theme(colors.foreground);
+    --prose-counters: theme(colors.muted.foreground);
+    --prose-bullets: theme(colors.muted.foreground);
+    --prose-hr: theme(colors.border);
+    --prose-quotes: theme(colors.foreground);
+    --prose-quote-borders: theme(colors.border);
+    --prose-captions: theme(colors.muted.foreground);
+    --prose-code: theme(colors.foreground);
+    --prose-pre-code: theme(colors.foreground);
+    --prose-pre-bg: theme(colors.muted.DEFAULT / 30%);
+    --prose-th-borders: theme(colors.border);
+    --prose-td-borders: theme(colors.border);
+  }
+
+  /* Code block container */
+  .markdown-content pre {
+    @apply relative overflow-hidden rounded-lg border border-border text-sm my-4;
+    background: rgb(248 250 252) !important; /* Light mode background */
+    /* Better mobile handling */
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .dark .markdown-content pre {
+    background: rgb(15 23 42) !important; /* Dark mode background */
+  }
+
+  /* Code content with line numbers */
+  .markdown-content pre[data-line-numbers] {
+    counter-reset: line;
+  }
+
+  .markdown-content pre code {
+    @apply block overflow-x-auto;
+    padding: 1rem;
+    padding-left: 3rem; /* Space for line numbers */
+    background: transparent !important;
+    /* Ensure horizontal scrolling on smaller screens */
+    max-width: 100%;
+    white-space: pre;
+  }
+
+  /* Individual code lines */
+  .markdown-content pre code .line {
+    @apply relative block min-h-[1.25rem] leading-5;
+    counter-increment: line;
+  }
+
+  /* Line numbers for code with data-line-numbers */
+  .markdown-content pre[data-line-numbers] code .line::before {
+    @apply absolute text-right text-xs select-none;
+    content: counter(line);
+    width: 2rem;
+    left: -2.5rem;
+    top: 0;
+    padding-right: 0.5rem;
+    color: rgb(100 116 139) !important; /* Light mode line numbers */
+  }
+
+  .dark .markdown-content pre[data-line-numbers] code .line::before {
+    color: rgb(148 163 184) !important; /* Dark mode line numbers */
+  }
+
+  /* Highlighted lines */
+  .markdown-content pre code .line.highlighted {
+    @apply bg-primary/10 -mx-4 px-4;
+  }
+
+  /* Highlighted characters */
+  .markdown-content pre .highlighted-chars {
+    @apply bg-primary/20 px-1 py-0.5 rounded;
+  }
+
+  /* Copy button styling */
+  .markdown-content pre .rehype-pretty-copy {
+    @apply absolute right-2 top-2 rounded-md p-2 opacity-0 transition-all duration-200 border;
+    background: rgb(255 255 255 / 90%) !important;
+    color: rgb(71 85 105) !important;
+    border-color: rgb(226 232 240) !important;
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .markdown-content pre .rehype-pretty-copy {
+    background: rgb(15 23 42 / 95%) !important;
+    color: rgb(148 163 184) !important;
+    border-color: rgb(51 65 85) !important;
+  }
+
+  .markdown-content pre:hover .rehype-pretty-copy {
+    @apply opacity-100;
+  }
+
+  .markdown-content pre .rehype-pretty-copy:hover {
+    background: rgb(255 255 255) !important;
+    color: rgb(15 23 42) !important;
+  }
+
+  .dark .markdown-content pre .rehype-pretty-copy:hover {
+    background: rgb(30 41 59) !important;
+    color: rgb(226 232 240) !important;
+  }
+
+  /* Copy button icon */
+  .markdown-content pre .rehype-pretty-copy svg {
+    @apply h-4 w-4;
+  }
+
+  /* Copy feedback styling */
+  .markdown-content pre .rehype-pretty-copy[data-copied=\"true\"] {
+    background: rgb(220 252 231) !important;
+    color: rgb(22 163 74) !important;
+    border-color: rgb(187 247 208) !important;
+  }
+
+  .dark .markdown-content pre .rehype-pretty-copy[data-copied=\"true\"] {
+    background: rgb(20 83 45) !important;
+    color: rgb(74 222 128) !important;
+    border-color: rgb(34 197 94) !important;
+  }
+
+  /* Inline code styling */
+  .markdown-content code:not(pre code) {
+    @apply rounded-md px-1.5 py-0.5 text-sm font-medium before:content-none after:content-none;
+    background: rgb(241 245 249) !important;
+    color: rgb(15 23 42) !important;
+  }
+
+  .dark .markdown-content code:not(pre code) {
+    background: rgb(30 41 59) !important;
+    color: rgb(226 232 240) !important;
+  }
+
+  /* Force shiki theme colors to work properly */
+  .markdown-content pre code .shiki,
+  .markdown-content pre code .shiki span {
+    background-color: transparent !important;
+  }
+
+  /* Light mode syntax colors */
+  .markdown-content pre code .shiki span[style] {
+    background-color: transparent !important;
+  }
+
+  /* Ensure proper text colors in light mode */
+  .markdown-content pre code {
+    color: rgb(15 23 42) !important; /* Light mode default text */
+  }
+
+  .dark .markdown-content pre code {
+    color: rgb(226 232 240) !important; /* Dark mode default text */
+  }
+
+  /* Remove any conflicting prose styles */
+  .markdown-content pre {
+    @apply first:mt-0 last:mb-0;
+  }
+
+  /* Better typography for other elements */
+  .markdown-content h1, .markdown-content h2, .markdown-content h3, 
+  .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+    @apply text-foreground font-semibold;
+  }
+
+  .markdown-content p {
+    @apply text-foreground leading-7;
+  }
+
+  .markdown-content a {
+    @apply text-primary font-medium no-underline hover:underline;
+  }
+
+  .markdown-content blockquote {
+    @apply border-l-2 border-muted-foreground pl-4 text-muted-foreground italic;
+  }
+
+  .markdown-content ul, .markdown-content ol {
+    @apply text-foreground space-y-2;
+  }
+
+  .markdown-content table {
+    @apply w-full border-collapse;
+  }
+
+  .markdown-content th, .markdown-content td {
+    @apply border border-border px-4 py-2;
+  }
+
+  .markdown-content th {
+    @apply bg-muted font-semibold;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 640px) {
+    .markdown-content pre code {
+      padding-left: 2.5rem; /* Reduce line number space on mobile */
+    }
+
+    .markdown-content pre[data-line-numbers] code .line::before {
+      width: 1.5rem;
+      left: -2rem;
+      font-size: 0.625rem; /* Smaller line numbers on mobile */
+    }
+
+    .markdown-content pre .rehype-pretty-copy {
+      right: 1rem;
+      top: 1rem;
+      padding: 0.5rem;
+    }
+
+    .markdown-content pre .rehype-pretty-copy svg {
+      @apply h-3.5 w-3.5;
+    }
+  }
+
+  /* Tablet responsive adjustments */
+  @media (max-width: 768px) {
+    .markdown-content pre {
+      margin-left: -1rem;
+      margin-right: -1rem;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+  }
+}
