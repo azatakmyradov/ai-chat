@@ -297,7 +297,7 @@ const Markdown: FC<MarkdownProps> = memo(({ markdown }) => {
                 if (match) {
                     return (
                         <SyntaxHighlighter
-                            style={customTheme}
+                            style={customTheme as any}
                             language={lang}
                             PreTag="div"
                             customStyle={{
