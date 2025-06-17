@@ -117,7 +117,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
-            <main className="flex overflow-y-auto relative flex-col flex-1 h-full">
+            <div className="flex relative flex-col h-full">
                 <Head title={currentTitle} />
 
                 <div className="flex justify-between items-center py-2 px-4 mx-auto w-full max-w-3xl">
@@ -191,8 +191,12 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                     )}
                 </ChatMessages>
 
-                {page.props.auth.user && <SendMessageForm chat={chat} models={models} disabled={isGenerating} />}
-            </main>
+                {page.props.auth.user && (
+                    <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-border bg-background md:left-64">
+                        <SendMessageForm chat={chat} models={models} disabled={isGenerating} />
+                    </div>
+                )}
+            </div>
         </AppLayout>
     );
 }
