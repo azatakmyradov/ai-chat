@@ -1,18 +1,23 @@
 import { cn } from '@/lib/utils';
 import type { ChatMessage as ChatMessageType, Model } from '@/types';
-import { ReactNode, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { Message } from './message';
 
 type Props = {
     messages: ChatMessageType[];
     children: ReactNode;
-    isStreaming?: boolean;
     models?: Model[];
     className?: string;
 };
 
-export function ChatMessages({ messages, children, isStreaming, models, className }: Props) {
+export function ChatMessages({ messages, children, models, className }: Props) {
     const lastMessageRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (lastMessageRef.current) {
+            lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
+        }
+    }, [messages]);
 
     return (
         <div className={cn('mx-auto mt-2 w-full flex-1 overflow-y-auto', className)}>
@@ -25,12 +30,7 @@ export function ChatMessages({ messages, children, isStreaming, models, classNam
                                 ref={index === messages.length - 1 ? lastMessageRef : undefined}
                                 className="min-h-[2rem]" // Ensure minimum height for each message
                             >
-                                <Message
-                                    key={message.id}
-                                    message={message}
-                                    isStreaming={isStreaming && index === messages.length - 1}
-                                    models={models}
-                                />
+                                <Message key={message.id} message={message} models={models} />
                             </div>
                         ),
                 )}

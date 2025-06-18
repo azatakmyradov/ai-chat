@@ -44,7 +44,8 @@ export function NavChats({ chats = {} as SidebarChats }: { chats: SidebarChats }
                                     <Link
                                         href={route('chat.show', { chat: chat.id })}
                                         className="group/chat flex items-center justify-between"
-                                        prefetch="hover"
+                                        preserveState={false}
+                                        prefetch="mount"
                                         preserveScroll={true}
                                     >
                                         {open && (
