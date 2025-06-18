@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\AI\OpenRouter\OpenRouter;
 use App\Enums\Models;
 use App\Events\AIResponseCompleted;
 use App\Events\AIResponseFailed;
@@ -20,6 +19,7 @@ use Prism\Prism\ValueObjects\Messages\Support\Image;
 use Prism\Prism\ValueObjects\Messages\Support\Document;
 use Prism\Prism\ValueObjects\Messages\Support\Text;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
+use Spatie\LaravelMarkdown\MarkdownRenderer;
 
 class AIStreamResponse implements ShouldQueue
 {
@@ -60,7 +60,7 @@ class AIStreamResponse implements ShouldQueue
             foreach ($response as $chunk) {
                 $content .= $chunk->text;
 
-                AIResponseReceived::dispatch($this->chat, $content, $chunk->text, $this->model->toArray());
+                AIResponseReceived::dispatch($this->chat, app(MarkdownRenderer::class)->highlightTheme('github-dark')->toHtml($content), $chunk->text, $this->model->toArray());
 
                 if ($chunk->finishReason) {
                     $message = $this->createAssistantMessage($content);

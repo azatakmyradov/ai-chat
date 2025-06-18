@@ -153,7 +153,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                     />
                 )}
 
-                <ChatMessages messages={messages} isStreaming={isStreaming} models={models} className="mt-10">
+                <ChatMessages messages={messages} models={models} className="mt-10">
                     {streaming.content.length > 0 && (
                         <>
                             <Message
@@ -166,7 +166,6 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                                     content: streaming.content,
                                     model: models.find((model) => model.id === streaming.model) as Model,
                                 }}
-                                isStreaming={true}
                             />
                         </>
                     )}

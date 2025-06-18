@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\LaravelMarkdown\MarkdownRenderer;
 
 class ChatMessage extends Model
 {
@@ -23,6 +24,13 @@ class ChatMessage extends Model
     {
         return Attribute::make(
             get: fn(?string $value) => $value ? Models::from($value)->toArray() : null,
+        );
+    }
+
+    public function content(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => $value ? app(MarkdownRenderer::class)->highlightTheme('github-dark')->toHtml($value) : null,
         );
     }
 

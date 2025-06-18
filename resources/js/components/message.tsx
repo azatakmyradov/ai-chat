@@ -4,7 +4,6 @@ import { router } from '@inertiajs/react';
 import { Check, Copy, FileIcon, GitBranchIcon, ImageIcon, RefreshCcw } from 'lucide-react';
 import { memo, useState } from 'react';
 import { AttachmentModal } from './attachment-modal';
-import { Markdown } from './markdown';
 import { ModelSelector } from './model-selector';
 import { DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
@@ -12,10 +11,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 type Props = {
     message: ChatMessage;
     models?: Model[];
-    isStreaming?: boolean;
 };
 
-const MessageComponent = memo(function MessageComponent({ message, models, isStreaming }: Props) {
+const MessageComponent = memo(function MessageComponent({ message, models }: Props) {
     const [selectedAttachment, setSelectedAttachment] = useState<ChatMessageAttachment | null>(null);
     const [isCopied, setIsCopied] = useState(false);
 
@@ -80,9 +78,8 @@ const MessageComponent = memo(function MessageComponent({ message, models, isStr
                         'prose-img:my-4 prose-img:rounded-lg',
                         'prose-hr:my-6 prose-hr:border-border',
                     )}
-                >
-                    <Markdown key={message.id} markdown={message.content} isStreaming={isStreaming} />
-                </div>
+                    dangerouslySetInnerHTML={{ __html: message.content }}
+                />
                 {message.attachments && message.attachments.length > 0 && (
                     <div className="my-2 flex flex-wrap gap-2">
                         {message.attachments.map((attachment) => (
