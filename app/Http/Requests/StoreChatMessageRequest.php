@@ -37,4 +37,12 @@ class StoreChatMessageRequest extends FormRequest
             ],
         ];
     }
+
+    public function attributes(): array
+    {
+        return [
+            'attachments' => 'attachments',
+            'attachments.*' => 'attachments',
+        ];
+    }
 }

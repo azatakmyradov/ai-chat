@@ -4,6 +4,7 @@ import { Chat, Model, SharedData } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { Globe, PaperclipIcon, SendIcon, StopCircle, XIcon } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { ModelSelector } from './model-selector';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -89,7 +90,13 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
 
             if (!chat) {
                 post(route('chat.store'), {
-                    preserveState: false,
+                    only: ['chats', 'messages'],
+                    preserveState: true,
+                    onError: (errors) => {
+                        Object.entries(errors).forEach(([key, value]) => {
+                            toast.error(value);
+                        });
+                    },
                     onSuccess: () => {
                         setData('message', '');
                         setData('attachments', []);
@@ -103,6 +110,12 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
                 async: true,
                 preserveState: true,
                 preserveScroll: true,
+                only: ['chats', 'messages'],
+                onError: (errors) => {
+                    Object.entries(errors).forEach(([key, value]) => {
+                        toast.error(value);
+                    });
+                },
                 onSuccess: () => {
                     setData('message', '');
                     setData('attachments', []);
@@ -114,9 +127,9 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
 
     if (!page.props.auth.user?.openrouter_api_key) {
         return (
-            <div className="px-4 mx-auto w-full max-w-3xl">
+            <div className="mx-auto w-full max-w-3xl px-4">
                 <div className="flex flex-col gap-2">
-                    <p className="mb-4 text-sm text-center text-muted-foreground">
+                    <p className="mb-4 text-center text-sm text-muted-foreground">
                         You need to set your OpenRouter API key in your profile to use this feature.
                     </p>
                 </div>
@@ -125,22 +138,22 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="px-4 mx-auto w-full max-w-3xl">
-            <div className="flex relative flex-col gap-2">
+        <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl px-4">
+            <div className="relative flex flex-col gap-2">
                 {selectedFiles.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-2">
                         {selectedFiles.map((file, index) => (
-                            <div key={index} className="flex gap-1 items-center py-1 px-2 text-sm rounded-md bg-muted">
+                            <div key={index} className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm">
                                 <span className="max-w-[200px] truncate">{file.name}</span>
                                 <button type="button" onClick={() => removeFile(index)} className="text-muted-foreground hover:text-foreground">
-                                    <XIcon className="w-4 h-4" />
+                                    <XIcon className="h-4 w-4" />
                                 </button>
                             </div>
                         ))}
                     </div>
                 )}
-                <div className="flex relative gap-2 items-end">
-                    <div className="flex absolute bottom-2 left-2 gap-1 items-center">
+                <div className="relative flex items-end gap-2">
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1">
                         <div className="relative">
                             <input
                                 type="file"
@@ -179,7 +192,7 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
                                 setData('model', model.id);
                             }}
                             trigger={
-                                <Button variant="outline" size="sm" className="gap-1.5 h-8">
+                                <Button variant="outline" size="sm" className="h-8 gap-1.5">
                                     {models.find((m) => m.id === selectedModel)?.name ?? 'Select Model'}
                                 </Button>
                             }
@@ -202,10 +215,10 @@ export function SendMessageForm({ chat, models, disabled }: Props) {
                         }}
                         autoFocus
                     />
-                    <div className="absolute bottom-2 right-4 z-10">
+                    <div className="absolute right-4 bottom-2 z-10">
                         <Button
                             type="submit"
-                            className="px-4 h-10"
+                            className="h-10 px-4"
                             size="icon"
                             disabled={(!data.message.trim() && data.attachments.length === 0) || processing || disabled}
                         >

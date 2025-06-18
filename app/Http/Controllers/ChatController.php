@@ -25,7 +25,7 @@ class ChatController extends Controller
     public function index()
     {
         return inertia('chat/index', [
-            'chats' => Cache::remember('chats.' . user()->id, now()->addMinutes(10), function () {
+            'chats' => fn() => Cache::remember('chats.' . user()->id, now()->addMinutes(10), function () {
                 return user()->chats()->latest()->latest('id')->get()->groupBy(function ($chat) {
                     return match (true) {
                         $chat->created_at->isToday() => 'today',
@@ -36,7 +36,7 @@ class ChatController extends Controller
                     };
                 });
             }),
-            'models' => Models::getAvailableModels(),
+            'models' => fn() => Models::getAvailableModels(),
         ]);
     }
 
@@ -105,11 +105,11 @@ class ChatController extends Controller
         });
 
         return inertia('chat/show', [
-            'chat' => $chat,
-            'chats' => $chats,
-            'messages' => $chat->messages,
-            'models' => Models::getAvailableModels(),
-            'show_loading_indicator' => session()->get('show_loading_indicator', false),
+            'chat' => fn() => $chat,
+            'chats' => fn() => $chats,
+            'messages' => fn() => $chat->messages,
+            'models' => fn() => Models::getAvailableModels(),
+            'show_loading_indicator' => fn() => session()->get('show_loading_indicator', false),
         ]);
     }
 
