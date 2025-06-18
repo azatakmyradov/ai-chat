@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Models;
+use App\Events\RetryChatMessage;
 use App\Jobs\AIStreamResponse;
 use App\Models\Chat;
 use App\Models\ChatMessage;
@@ -27,21 +28,24 @@ class RetryChatMessageController extends Controller
             $model = Models::from($request->model);
         } catch (ValueError) {
             Log::error('Invalid model', ['model' => $request->model]);
+
             return redirect()->route('chat.show', $chat)->with('error', 'Invalid model');
         } catch (Exception) {
             Log::error('An error occurred while retrying the message', ['model' => $request->model]);
+
             return redirect()->route('chat.show', $chat)->with('error', 'An error occurred while retrying the message');
         }
 
         $chat->messages()->where('id', '>=', $message->id)->delete();
 
+        Cache::forget('chat.'.$chat->id);
+
         $lastMessageUserMessage = $chat->messages()->latest()->where('role', 'user')->first();
 
+        RetryChatMessage::dispatch($chat, $chat->messages);
         AIStreamResponse::dispatch($chat->refresh(), $lastMessageUserMessage?->web_search ?? false, $model);
 
         session()->flash('show_loading_indicator', true);
-
-        Cache::forget('chat.' . $chat->id);
 
         return redirect()->route('chat.show', $chat);
     }

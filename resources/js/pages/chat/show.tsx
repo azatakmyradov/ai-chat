@@ -82,6 +82,13 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
         setMessages((prevMessages) => [...prevMessages, message]);
     });
 
+    useEcho(`chat.${chat.id}`, 'RetryChatMessage', ({ messages: newMessages }: { messages: ChatMessage[] }) => {
+        if (!isGenerating) {
+            setIsGenerating(true);
+            setMessages(() => newMessages);
+        }
+    });
+
     const messageContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -121,11 +128,11 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} chats={chats}>
-            <div className="relative flex h-full flex-col">
+            <div className="flex relative flex-col h-full">
                 <Head title={currentTitle} />
 
-                <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-2">
-                    <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center py-2 px-4 mx-auto w-full max-w-3xl">
+                    <div className="flex gap-2 items-center">
                         {shouldGenerateTitle && chat && (
                             <TitleGenerator
                                 chatId={chat.id}
@@ -169,24 +176,24 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                         </>
                     )}
                     {isGenerating && streaming.content.length === 0 && (
-                        <div className="flex items-center gap-2 rounded-xl bg-background py-4">
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        <div className="flex gap-2 items-center py-4 rounded-xl bg-background">
+                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">AI is generating...</span>
                         </div>
                     )}
                 </ChatMessages>
 
                 {page.props.auth.user && (
-                    <div className="fixed right-0 bottom-0 left-0 border-t border-border bg-background/10 p-4 backdrop-blur-sm md:left-64">
-                        <div className="mx-auto flex max-w-3xl justify-end px-4 pb-4">
+                    <div className="fixed right-0 bottom-0 left-0 p-4 border-t md:left-64 border-border bg-background/10 backdrop-blur-sm">
+                        <div className="flex justify-end px-4 pb-4 mx-auto max-w-3xl">
                             {page.props.auth.user && (
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex gap-2 items-center">
                                                 <Switch id="public-toggle" checked={isPublic} onCheckedChange={handlePublicToggle} />
-                                                <Label htmlFor="public-toggle" className="flex cursor-pointer items-center gap-1">
-                                                    <Globe className="h-4 w-4" />
+                                                <Label htmlFor="public-toggle" className="flex gap-1 items-center cursor-pointer">
+                                                    <Globe className="w-4 h-4" />
                                                     <span className="text-sm">Public</span>
                                                 </Label>
                                             </div>
