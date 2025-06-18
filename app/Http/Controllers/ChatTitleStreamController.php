@@ -49,7 +49,7 @@ class ChatTitleStreamController extends Controller
                 }
 
                 // Wait a bit before checking again
-                usleep(500000); // 0.5 seconds
+                usleep(1000000); // 1 second
             }
         }, endStreamWith: new StreamedEvent(event: 'title-update', data: '</stream>'));
     }

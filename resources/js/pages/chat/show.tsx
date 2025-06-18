@@ -38,8 +38,6 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
 
     const page = usePage<SharedData>();
 
-    const isStreaming = streaming.content.length > 0;
-
     useEffect(() => {
         if (show_loading_indicator) {
             setIsGenerating(true);
@@ -47,11 +45,11 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
     }, [show_loading_indicator]);
 
     useEffect(() => {
-        if (chat && chat.title === 'New Thread' && streaming.content.length > 0) {
+        if (chat && chat.title === 'New Thread') {
             setShouldGenerateTitle(true);
             setShouldUpdateSidebar(true);
         }
-    }, [chat, streaming.content]);
+    }, [chat]);
 
     useEcho(`chat.${chat.id}`, 'AIResponseReceived', ({ content, chunk, model }: { content: string; chunk: string; model: Model }) => {
         if (chunk.trim() === '') return;
@@ -166,6 +164,7 @@ export default function Show({ chat, messages: initialMessages, chats, models, s
                                     content: streaming.content,
                                     model: models.find((model) => model.id === streaming.model) as Model,
                                 }}
+                                isStreaming={true}
                             />
                         </>
                     )}

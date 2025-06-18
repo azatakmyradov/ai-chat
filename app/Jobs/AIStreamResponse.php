@@ -12,6 +12,7 @@ use App\Models\ChatMessageAttachment;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Mail\Markdown;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Prism\Prism\Prism;
@@ -61,7 +62,7 @@ class AIStreamResponse implements ShouldQueue
             foreach ($response as $chunk) {
                 $content .= $chunk->text;
 
-                AIResponseReceived::dispatch($this->chat, app(MarkdownRenderer::class)->highlightTheme('github-dark')->toHtml($content), $chunk->text, $this->model->toArray());
+                AIResponseReceived::dispatch($this->chat, Markdown::parse($content)->toHtml(), $chunk->text, $this->model->toArray());
 
                 if ($chunk->finishReason) {
                     $message = $this->createAssistantMessage($content);

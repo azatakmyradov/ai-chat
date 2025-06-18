@@ -11,9 +11,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 type Props = {
     message: ChatMessage;
     models?: Model[];
+    isStreaming?: boolean;
 };
 
-const MessageComponent = memo(function MessageComponent({ message, models }: Props) {
+const MessageComponent = memo(function MessageComponent({ message, models, isStreaming = false }: Props) {
     const [selectedAttachment, setSelectedAttachment] = useState<ChatMessageAttachment | null>(null);
     const [isCopied, setIsCopied] = useState(false);
 
@@ -62,6 +63,7 @@ const MessageComponent = memo(function MessageComponent({ message, models }: Pro
                         'prose prose-sm w-full max-w-none break-words',
                         // Code
                         'prose-code:rounded-md prose-code:font-mono prose-code:text-sm prose-code:text-foreground prose-pre:my-2',
+                        isStreaming && 'prose-code:text-white',
                         // Typography
                         'prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-semibold prose-headings:break-words prose-headings:text-foreground',
                         'prose-p:mt-0 prose-p:mb-2 prose-p:leading-7 prose-p:break-words prose-p:text-foreground',
