@@ -65,8 +65,8 @@ class ChatTitleStreamController extends Controller
 
         try {
             $response = Prism::text()
-                ->using(Provider::Gemini, Models::GEMINI_2_0_FLASH_LITE->value)
-                ->withSystemPrompt('Generate a concise, descriptive title (max 50 characters) for a chat that starts with the following message. Respond with only the title, no quotes or extra formatting.')
+                ->using('open-router', Models::GEMINI_2_5_FLASH->value)
+                ->withSystemPrompt('Generate a concise, descriptive title (max 50 characters) for a chat that starts with the following message. Respond with only the title, no quotes, extra formatting')
                 ->withPrompt($firstMessage->content)
                 ->asText();
 
@@ -83,7 +83,7 @@ class ChatTitleStreamController extends Controller
             Log::info('Generated title for chat', ['chat_id' => $chat->id, 'title' => $generatedTitle]);
         } catch (\Exception $e) {
             // Fallback title on error
-            $fallbackTitle = substr($firstMessage->content, 0, 47) . '...';
+            $fallbackTitle = substr($firstMessage->getRawOriginal('content'), 0, 47) . '...';
             $chat->update(['title' => $fallbackTitle]);
             Log::error('Error generating title, using fallback', ['error' => $e->getMessage()]);
         }

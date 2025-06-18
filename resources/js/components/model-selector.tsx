@@ -40,24 +40,28 @@ export function ModelSelector({ selectedModel, models, trigger, onSelect, childr
             <DropdownMenuContent>
                 {children !== undefined && children}
                 {modelsByProvider &&
-                    Object.entries(modelsByProvider).map(([providerId, { name: providerName, models: providerModels }]) => (
-                        <DropdownMenuSub key={providerId}>
-                            <DropdownMenuSubTrigger className={cn(providerId === selectedModel?.split('/')[0] && 'bg-accent text-accent-foreground')}>
-                                {providerName}
-                            </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent>
-                                {providerModels.map((model) => (
-                                    <DropdownMenuItem
-                                        key={model.id}
-                                        onClick={() => onSelect(model)}
-                                        className={cn(model.id === selectedModel && 'bg-accent text-accent-foreground')}
-                                    >
-                                        {model.name}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                    ))}
+                    Object.entries(modelsByProvider)
+                        .filter(([providerId]) => providerId !== 'unknown')
+                        .map(([providerId, { name: providerName, models: providerModels }]) => (
+                            <DropdownMenuSub key={providerId}>
+                                <DropdownMenuSubTrigger
+                                    className={cn(providerId === selectedModel?.split('/')[0] && 'bg-accent text-accent-foreground')}
+                                >
+                                    {providerName}
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent>
+                                    {providerModels.map((model) => (
+                                        <DropdownMenuItem
+                                            key={model.id}
+                                            onClick={() => onSelect(model)}
+                                            className={cn(model.id === selectedModel && 'bg-accent text-accent-foreground')}
+                                        >
+                                            {model.name}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                        ))}
             </DropdownMenuContent>
         </DropdownMenu>
     );

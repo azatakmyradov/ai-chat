@@ -74,7 +74,7 @@ export function NavChats({ chats = {} as SidebarChats }: { chats: SidebarChats }
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 )}
-                                                <span>{chat.title}</span>
+                                                <div>{chat.title}</div>
                                             </div>
                                         )}
                                         {!open && (
