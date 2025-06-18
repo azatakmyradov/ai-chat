@@ -8,6 +8,7 @@ use App\Models\Chat;
 use App\Models\ChatMessage;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use ValueError;
 
@@ -39,6 +40,8 @@ class RetryChatMessageController extends Controller
         AIStreamResponse::dispatch($chat->refresh(), $lastMessageUserMessage?->web_search ?? false, $model);
 
         session()->flash('show_loading_indicator', true);
+
+        Cache::forget('chat.' . $chat->id);
 
         return redirect()->route('chat.show', $chat);
     }

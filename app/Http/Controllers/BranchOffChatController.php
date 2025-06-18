@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\ChatMessageAttachment;
+use Illuminate\Support\Facades\Cache;
 
 class BranchOffChatController extends Controller
 {
@@ -28,6 +29,10 @@ class BranchOffChatController extends Controller
                 $newAttachment->save();
             });
         });
+
+        Cache::forget('chat.' . $chat->id);
+        Cache::forget('chat.' . $newChat->id);
+        Cache::forget('chats.' . user()->id);
 
         return redirect()->route('chat.show', $newChat);
     }

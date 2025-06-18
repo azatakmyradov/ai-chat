@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\Models;
 use App\Models\Chat;
-use Illuminate\Http\Request;
 use Illuminate\Http\StreamedEvent;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
