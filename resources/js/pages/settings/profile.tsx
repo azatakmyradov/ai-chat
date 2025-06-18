@@ -1,6 +1,6 @@
-import { type BreadcrumbItem, type SharedData } from '@/types';
+import { type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 import DeleteUser from '@/components/delete-user';
@@ -10,13 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SettingsLayout from '@/layouts/settings/layout';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Profile settings',
-        href: '/settings/profile',
-    },
-];
 
 type ProfileForm = {
     name: string;
@@ -55,6 +48,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     return (
         <SettingsLayout>
+            <Head title="Profile" />
+
             <div className="space-y-6">
                 <HeadingSmall title="Profile information" description="Update your name and email address" />
 
@@ -64,7 +59,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                         <Input
                             id="name"
-                            className="mt-1 block w-full"
+                            className="block mt-1 w-full"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             required
@@ -81,7 +76,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         <Input
                             id="email"
                             type="email"
-                            className="mt-1 block w-full"
+                            className="block mt-1 w-full"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             required
@@ -113,7 +108,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <Input
                                 id="openrouter_api_key"
                                 type="text"
-                                className="mt-1 block w-full"
+                                className="block mt-1 w-full"
                                 value={data.openrouter_api_key!}
                                 onChange={(e) => setData('openrouter_api_key', e.target.value)}
                                 autoComplete="openrouter_api_key"
@@ -146,7 +141,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
                     )}
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex gap-4 items-center">
                         <Button disabled={processing}>Save</Button>
 
                         <Transition

@@ -1,21 +1,13 @@
 import InputError from '@/components/input-error';
 import SettingsLayout from '@/layouts/settings/layout';
-import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
-import { useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Password settings',
-        href: '/settings/password',
-    },
-];
 
 export default function Password() {
     const passwordInput = useRef<HTMLInputElement>(null);
@@ -49,6 +41,8 @@ export default function Password() {
 
     return (
         <SettingsLayout>
+            <Head title="Profile" />
+
             <div className="space-y-6">
                 <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
 
@@ -62,7 +56,7 @@ export default function Password() {
                             value={data.current_password}
                             onChange={(e) => setData('current_password', e.target.value)}
                             type="password"
-                            className="mt-1 block w-full"
+                            className="block mt-1 w-full"
                             autoComplete="current-password"
                             placeholder="Current password"
                         />
@@ -79,7 +73,7 @@ export default function Password() {
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
                             type="password"
-                            className="mt-1 block w-full"
+                            className="block mt-1 w-full"
                             autoComplete="new-password"
                             placeholder="New password"
                         />
@@ -95,7 +89,7 @@ export default function Password() {
                             value={data.password_confirmation}
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             type="password"
-                            className="mt-1 block w-full"
+                            className="block mt-1 w-full"
                             autoComplete="new-password"
                             placeholder="Confirm password"
                         />
@@ -103,7 +97,7 @@ export default function Password() {
                         <InputError message={errors.password_confirmation} />
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex gap-4 items-center">
                         <Button disabled={processing}>Save password</Button>
 
                         <Transition
