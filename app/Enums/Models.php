@@ -14,7 +14,9 @@ enum Models: string
     case CLAUDE_4_0_OPUS = 'anthropic/claude-opus-4';
     case GEMINI_2_0_FLASH_LITE = 'google/gemini-2.0-flash-lite-001';
     case GEMINI_2_0_FLASH = 'google/gemini-2.0-flash-001';
-    case GEMINI_2_5_PRO = 'google/gemini-2.5-pro-preview';
+    case GEMINI_2_5_PRO = 'google/gemini-2.5-pro';
+    case GEMINI_2_5_FLASH = 'google/gemini-2.5-flash';
+    case UNKNOWN = 'unknown';
 
     public static function getAvailableModels(): array
     {
@@ -27,10 +29,10 @@ enum Models: string
     public function getName(): string
     {
         return match ($this) {
-            self::GPT_4O_MINI => 'GPT-4o mini',
-            self::GPT_4_1_NANO => 'GPT-4.1 Nano',
-            self::O4_MINI => 'GPT o4 mini',
-            self::O3_MINI => 'GPT o3 mini',
+            self::GPT_4O_MINI => '4o mini',
+            self::GPT_4_1_NANO => '4.1 Nano',
+            self::O4_MINI => 'o4 mini',
+            self::O3_MINI => 'o3 mini',
             self::CLAUDE_3_5_SONNET => 'Claude 3.5 Sonnet',
             self::CLAUDE_3_7_SONNET => 'Claude 3.7 Sonnet',
             self::CLAUDE_4_0_SONNET => 'Claude 4.0 Sonnet',
@@ -38,6 +40,8 @@ enum Models: string
             self::GEMINI_2_0_FLASH_LITE => 'Gemini 2.0 Flash Lite',
             self::GEMINI_2_0_FLASH => 'Gemini 2.0 Flash',
             self::GEMINI_2_5_PRO => 'Gemini 2.5 Pro',
+            self::GEMINI_2_5_FLASH => 'Gemini 2.5 Flash',
+            self::UNKNOWN => 'Unknown',
         };
     }
 
@@ -55,6 +59,8 @@ enum Models: string
             self::GEMINI_2_0_FLASH_LITE => 'Gemini 2.0 Flash Lite',
             self::GEMINI_2_0_FLASH => 'Gemini 2.0 Flash',
             self::GEMINI_2_5_PRO => 'Gemini 2.5 Pro',
+            self::GEMINI_2_5_FLASH => 'Gemini 2.5 Flash',
+            self::UNKNOWN => 'Unknown',
         };
     }
 

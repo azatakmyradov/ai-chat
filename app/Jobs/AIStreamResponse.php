@@ -50,6 +50,10 @@ class AIStreamResponse implements ShouldQueue
             return;
         }
 
+        if ($this->model === Models::UNKNOWN) {
+            $this->model = Models::GEMINI_2_5_FLASH;
+        }
+
         $response = Prism::text()
             ->using('open-router', $this->webSearch ? $this->model->value . ':online' : $this->model->value, [
                 'api_key' => $apiKey,

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\LaravelMarkdown\MarkdownRenderer;
+use Throwable;
 
 class ChatMessage extends Model
 {
@@ -23,8 +24,21 @@ class ChatMessage extends Model
     protected function model(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => $value ? Models::from($value)->toArray() : null,
+            get: fn(?string $value) => $this->getModel($value)->toArray(),
         );
+    }
+
+    protected function getModel(?string $value): Models
+    {
+        if (!$value) {
+            return Models::UNKNOWN;
+        }
+
+        try {
+            return Models::tryFrom($value);
+        } catch (Throwable) {
+            return Models::UNKNOWN;
+        }
     }
 
     public function content(): Attribute
