@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Prism\Prism\Prism;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\Support\Image;
@@ -78,13 +79,17 @@ class AIStreamResponse implements ShouldQueue
 
     private function createAssistantMessage(string $content, bool $isFailed = false): ChatMessage
     {
-        return $this->chat->messages()->create([
+        $message = $this->chat->messages()->create([
             'user_id' => $this->chat->user_id,
             'role' => 'assistant',
             'content' => $content,
             'model' => $this->model->value,
             'is_failed' => $isFailed,
         ]);
+
+        Cache::forget('chat.' . $this->chat->id);
+
+        return $message;
     }
 
     private function buildConversationHistory(): array

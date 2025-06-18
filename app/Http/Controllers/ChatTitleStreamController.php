@@ -6,6 +6,7 @@ use App\Enums\Models;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Http\StreamedEvent;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Prism;
@@ -74,7 +75,7 @@ class ChatTitleStreamController extends Controller
 
             // Ensure title length
             if (strlen($generatedTitle) > 50) {
-                $generatedTitle = substr($generatedTitle, 0, 47).'...';
+                $generatedTitle = substr($generatedTitle, 0, 47) . '...';
             }
 
             // Update the chat title
@@ -83,9 +84,11 @@ class ChatTitleStreamController extends Controller
             Log::info('Generated title for chat', ['chat_id' => $chat->id, 'title' => $generatedTitle]);
         } catch (\Exception $e) {
             // Fallback title on error
-            $fallbackTitle = substr($firstMessage->content, 0, 47).'...';
+            $fallbackTitle = substr($firstMessage->content, 0, 47) . '...';
             $chat->update(['title' => $fallbackTitle]);
             Log::error('Error generating title, using fallback', ['error' => $e->getMessage()]);
         }
+
+        Cache::forget('chats.' . user()->id);
     }
 }

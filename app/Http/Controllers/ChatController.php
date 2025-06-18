@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateChatRequest;
 use App\Models\Chat;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ChatController extends Controller
@@ -24,14 +25,16 @@ class ChatController extends Controller
     public function index()
     {
         return inertia('chat/index', [
-            'chats' => user()->chats()->latest()->latest('id')->get()->groupBy(function ($chat) {
-                return match (true) {
-                    $chat->created_at->isToday() => 'today',
-                    $chat->created_at->isYesterday() => 'yesterday',
-                    $chat->created_at->isBefore(now()->subDays(7)) => 'last_week',
-                    $chat->created_at->isBefore(now()->subDays(30)) => 'last_month',
-                    default => 'older',
-                };
+            'chats' => Cache::remember('chats.' . user()->id, now()->addMinutes(10), function () {
+                return user()->chats()->latest()->latest('id')->get()->groupBy(function ($chat) {
+                    return match (true) {
+                        $chat->created_at->isToday() => 'today',
+                        $chat->created_at->isYesterday() => 'yesterday',
+                        $chat->created_at->isBefore(now()->subDays(7)) => 'last_week',
+                        $chat->created_at->isBefore(now()->subDays(30)) => 'last_month',
+                        default => 'older',
+                    };
+                });
             }),
             'models' => Models::getAvailableModels(),
         ]);
@@ -53,6 +56,8 @@ class ChatController extends Controller
             );
 
             DB::commit();
+
+            Cache::forget('chats.' . user()->id);
         } catch (Exception) {
             DB::rollBack();
 
@@ -81,19 +86,27 @@ class ChatController extends Controller
      */
     public function show(Chat $chat)
     {
-        $chat->load(['messages.user', 'messages.attachments']);
+        $chats = Auth::check()
+            ? Cache::remember('chats.' . user()->id, now()->addMinutes(10), function () {
+                return user()->chats()->latest()->latest('id')->get()->groupBy(function ($chat) {
+                    return match (true) {
+                        $chat->created_at->isToday() => 'today',
+                        $chat->created_at->isYesterday() => 'yesterday',
+                        $chat->created_at->isBefore(now()->subDays(7)) => 'last_week',
+                        $chat->created_at->isBefore(now()->subDays(30)) => 'last_month',
+                        default => 'older',
+                    };
+                });
+            })
+            : [];
+
+        $chat = Cache::remember('chat.' . $chat->id, now()->addMinutes(10), function () use ($chat) {
+            return $chat->load(['messages.user', 'messages.attachments']);
+        });
 
         return inertia('chat/show', [
             'chat' => $chat,
-            'chats' => Auth::check() ? user()->chats()->latest()->latest('id')->get()->groupBy(function ($chat) {
-                return match (true) {
-                    $chat->created_at->isToday() => 'today',
-                    $chat->created_at->isYesterday() => 'yesterday',
-                    $chat->created_at->isBefore(now()->subDays(7)) => 'last_week',
-                    $chat->created_at->isBefore(now()->subDays(30)) => 'last_month',
-                    default => 'older',
-                };
-            }) : [],
+            'chats' => $chats,
             'messages' => $chat->messages,
             'models' => Models::getAvailableModels(),
             'show_loading_indicator' => session()->get('show_loading_indicator', false),
@@ -107,6 +120,8 @@ class ChatController extends Controller
     {
         $chatId = $chat->id;
         $chat->delete();
+
+        Cache::forget('chats.' . user()->id);
 
         // Check if this is the current chat being viewed
         $currentUrl = request()->header('Referer') ?? '';
